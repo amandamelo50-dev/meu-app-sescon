@@ -1,86 +1,4 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <title>Ficha de Associação - SESCON-SP</title>
-  <link rel="stylesheet" href="style.css" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-</head>
-<body>
-  <div class="container">
-    <h1>Ficha de Associação - SESCON-SP</h1>
-    <p style="text-align: center; color: #666; margin-bottom: 30px;">
-      Preencha os dados abaixo para gerar sua ficha de associação
-    </p>
-
-    <form id="fichaForm">
-      <h2>Dados da Empresa</h2>
-      
-      <label>CNPJ *</label>
-      <input type="text" name="cnpj" placeholder="Somente números" required maxlength="14">
-
-      <label>Razão Social *</label>
-      <input type="text" name="razao" placeholder="Nome completo da empresa" required>
-
-      <label>E-mail *</label>
-      <input type="email" name="email" placeholder="contato@empresa.com" required>
-
-      <label>Telefone *</label>
-      <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX" required>
-
-      <label>Endereço Completo</label>
-      <input type="text" name="endereco" placeholder="Rua, número, complemento, cidade">
-
-      <h2>Dados do Sócio</h2>
-
-      <label>Nome do Sócio *</label>
-      <input type="text" name="nome_socio" placeholder="Nome completo do sócio" required>
-
-      <label>CPF do Sócio *</label>
-      <input type="text" name="cpf_socio" placeholder="Somente números" required maxlength="11">
-
-      <h2>Plano e Pagamento</h2>
-
-      <label>Plano Sugerido</label>
-      <select name="plano">
-        <option value="Plano Prata">Plano Prata</option>
-        <option value="Plano Ouro Premium">Plano Ouro Premium</option>
-        <option value="Prata Aescon">Prata Aescon</option>
-      </select>
-
-      <label>Forma de Pagamento</label>
-      <select name="forma_pagamento">
-        <option value="Parcelado">Parcelado</option>
-        <option value="À vista">À vista</option>
-      </select>
-
-      <h2>Assinatura</h2>
-      
-      <label>Assinatura do Sócio (use mouse ou toque)</label>
-      <canvas id="signature-pad" width=600 height=200></canvas>
-      <div class="sig-buttons">
-        <button type="button" id="clearBtn">Limpar Assinatura</button>
-      </div>
-
-      <label style="margin-top: 20px;">
-        <input type="checkbox" name="termo_aceite" value="1" required> 
-        Declaro estar ciente e de acordo com os termos de associação. *
-      </label>
-
-      <button type="submit" id="sendBtn">Gerar PDF da Ficha</button>
-    </form>
-
-    <div id="result" style="margin-top:20px;"></div>
-    <a id="downloadLink" style="display:none">📥 Baixar PDF Gerado</a>
-
-    <!-- FOOTER LGPD -->
-    <div class="lgpd-footer">
-      <strong>O Sescon-SP informa que, em respeito aos preceitos elencados no art. 6º da LGPD e, em especial, ao Princípio da Finalidade, a coleta dos dados pessoais dispostos neste formulário, será pautada na hipótese de tratamento prevista no inciso IX do Art. 7º da Lei nº 13.709/18.</strong><br><br>
-      Saiba mais: <a href="https://sescon.org.br/wp-content/uploads/2025/05/POLITICA-DE-PRIVACIDADE-E-COOKIES-1.pdf" target="_blank">Política de Privacidade e Cookies</a>
-    </div>
-  </div>
-
-  <script>
+<script>
     // Simple signature pad (mouse & touch)
     const canvas = document.getElementById("signature-pad");
     const ctx = canvas.getContext("2d");
@@ -148,15 +66,167 @@
         ctx.clearRect(0,0,canvas.width,canvas.height);
     });
 
+    // ========== CONSULTA AUTOMÁTICA DE CNPJ ==========
+    async function consultarCNPJ(cnpj) {
+        try {
+            const response = await fetch(`https://meu-app-sescon.onrender.com/consultar-cnpj/${cnpj}`);
+            if (response.ok) {
+                const dados = await response.json();
+                
+                // Preencher campos automaticamente
+                if (dados.razao_social) {
+                    document.querySelector('input[name="razao"]').value = dados.razao_social;
+                }
+                if (dados.endereco) {
+                    document.querySelector('input[name="endereco"]').value = dados.endereco;
+                }
+                
+                // Sugerir plano baseado no CNPJ
+                await sugerirPlano(cnpj);
+                
+                console.log('Dados automáticos preenchidos:', dados);
+                mostrarMensagem('✅ Dados da empresa preenchidos automaticamente!', 'success');
+            }
+        } catch (error) {
+            console.log('CNPJ não encontrado ou erro na consulta');
+            mostrarMensagem('⚠️ CNPJ não encontrado. Preencha os dados manualmente.', 'warning');
+        }
+    }
+
+    // ========== SUGERIR PLANO AUTOMATICAMENTE ==========
+    async function sugerirPlano(cnpj) {
+        try {
+            const response = await fetch(`https://meu-app-sescon.onrender.com/sugerir-plano/${cnpj}`);
+            if (response.ok) {
+                const dados = await response.json();
+                
+                if (dados.plano && !dados.error) {
+                    // Selecionar automaticamente o plano sugerido
+                    const selectPlano = document.querySelector('select[name="plano"]');
+                    const opcoes = Array.from(selectPlano.options);
+                    const opcaoSugerida = opcoes.find(opcao => opcao.text.includes(dados.plano));
+                    
+                    if (opcaoSugerida) {
+                        selectPlano.value = opcaoSugerida.value;
+                        mostrarMensagem(`📊 Plano sugerido: ${dados.plano}`, 'info');
+                        
+                        // Calcular valores do plano selecionado
+                        await calcularValores(dados.plano);
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('Erro ao sugerir plano:', error);
+        }
+    }
+
+    // ========== CALCULAR E EXIBIR VALORES ==========
+    async function calcularValores(plano) {
+        try {
+            const response = await fetch(`https://meu-app-sescon.onrender.com/calcular-valores/${plano}`);
+            if (response.ok) {
+                const valores = await response.json();
+                
+                // Criar ou atualizar a seção de valores
+                let valoresSection = document.getElementById('valores-section');
+                if (!valoresSection) {
+                    valoresSection = document.createElement('div');
+                    valoresSection.id = 'valores-section';
+                    valoresSection.innerHTML = `
+                        <h2>💳 Valores do Plano</h2>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <strong>À Vista:</strong><br>
+                                    <span id="valor-a-vista" style="font-size: 1.2em; color: #28a745;"></span>
+                                </div>
+                                <div>
+                                    <strong>Parcelado:</strong><br>
+                                    <span id="valor-parcelado" style="font-size: 1.1em; color: #007bff;"></span>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                                💡 Valores proporcionais ao mês atual
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Inserir após a seção de plano
+                    const planoSection = document.querySelector('select[name="plano"]').closest('div');
+                    planoSection.parentNode.insertBefore(valoresSection, planoSection.nextSibling);
+                }
+                
+                // Atualizar valores
+                document.getElementById('valor-a-vista').textContent = valores.a_vista;
+                document.getElementById('valor-parcelado').textContent = valores.parcelado;
+                
+            }
+        } catch (error) {
+            console.log('Erro ao calcular valores:', error);
+        }
+    }
+
+    // ========== FUNÇÃO PARA MOSTRAR MENSAGENS ==========
+    function mostrarMensagem(mensagem, tipo = 'info') {
+        // Remover mensagem anterior
+        const mensagemAnterior = document.getElementById('mensagem-flutuante');
+        if (mensagemAnterior) {
+            mensagemAnterior.remove();
+        }
+        
+        const cores = {
+            'success': '#28a745',
+            'warning': '#ffc107', 
+            'error': '#dc3545',
+            'info': '#17a2b8'
+        };
+        
+        const mensagemDiv = document.createElement('div');
+        mensagemDiv.id = 'mensagem-flutuante';
+        mensagemDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${cores[tipo]};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease;
+        `;
+        
+        mensagemDiv.textContent = mensagem;
+        document.body.appendChild(mensagemDiv);
+        
+        // Remover após 5 segundos
+        setTimeout(() => {
+            if (mensagemDiv.parentNode) {
+                mensagemDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => mensagemDiv.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    // ========== EVENTOS ==========
+    
+    // Consulta automática ao sair do campo CNPJ
+    document.querySelector('input[name="cnpj"]').addEventListener('blur', function() {
+        const cnpj = this.value.replace(/\D/g, '');
+        if (cnpj.length === 14) {
+            consultarCNPJ(cnpj);
+        }
+    });
+
+    // Calcular valores quando mudar o plano
+    document.querySelector('select[name="plano"]').addEventListener('change', function() {
+        calcularValores(this.value);
+    });
+
     // Validação de CNPJ em tempo real
     document.querySelector('input[name="cnpj"]').addEventListener('input', function() {
         let cnpj = this.value.replace(/\D/g, '');
         this.value = cnpj;
-        
-        if (cnpj.length === 14) {
-            // Aqui vamos implementar a consulta automática depois
-            console.log('CNPJ válido para consulta:', cnpj);
-        }
     });
 
     // Validação de CPF em tempo real
@@ -165,7 +235,7 @@
         this.value = cpf;
     });
 
-    // Envio do formulário
+    // ========== ENVIO DO FORMULÁRIO ==========
     document.getElementById("fichaForm").addEventListener("submit", async (ev) => {
         ev.preventDefault();
         const form = ev.target;
@@ -192,6 +262,15 @@
             return;
         }
 
+        // Validar assinatura
+        const signatureData = canvas.toDataURL();
+        if (signatureData === canvas.constructor.prototype.toDataURL.call(canvas)) {
+            resultDiv.textContent = "❌ Por favor, faça sua assinatura no campo indicado";
+            resultDiv.style.color = "red";
+            resultDiv.style.backgroundColor = "#ffe6e6";
+            return;
+        }
+
         // Mostrar loading
         sendBtn.textContent = "Gerando PDF...";
         sendBtn.disabled = true;
@@ -205,8 +284,7 @@
         });
 
         // signature as dataURL
-        const dataURL = canvas.toDataURL("image/png");
-        json.signature = dataURL;
+        json.signature = signatureData;
 
         try {
             const resp = await fetch("https://meu-app-sescon.onrender.com/gerar-pdf", {
@@ -220,27 +298,43 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.getElementById("downloadLink");
                 link.href = url;
-                link.download = "ficha_associacao_sescon.pdf";
+                link.download = `ficha_associacao_${json.razao.replace(/\s+/g, '_')}.pdf`;
                 link.style.display = "block";
                 
                 resultDiv.textContent = "✅ PDF gerado com sucesso! Clique no link acima para baixar.";
                 resultDiv.style.color = "green";
                 resultDiv.style.backgroundColor = "#e6ffe6";
+                
+                mostrarMensagem('✅ Ficha gerada com sucesso!', 'success');
             } else {
                 const errorText = await resp.text();
                 resultDiv.textContent = "❌ Erro ao gerar PDF: " + errorText;
                 resultDiv.style.color = "red";
                 resultDiv.style.backgroundColor = "#ffe6e6";
+                mostrarMensagem('❌ Erro ao gerar PDF', 'error');
             }
         } catch (error) {
             resultDiv.textContent = "❌ Erro de conexão: " + error.message;
             resultDiv.style.color = "red";
             resultDiv.style.backgroundColor = "#ffe6e6";
+            mostrarMensagem('❌ Erro de conexão', 'error');
         } finally {
             sendBtn.textContent = "Gerar PDF da Ficha";
             sendBtn.disabled = false;
         }
     });
-  </script>
-</body>
-</html>
+
+    // ========== ANIMAÇÕES CSS ==========
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>

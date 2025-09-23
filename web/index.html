@@ -133,7 +133,7 @@
     json.signature = dataURL;
 
     // Call backend (ajuste host/porta se necessário)
-    const resp = await fetch("http://localhost:8000/gerar-pdf", {
+    const resp = await fetch("https://meu-app-sescon.onrender.com/gerar-pdf", {
       method:"POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(json)

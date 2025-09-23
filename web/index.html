@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Ficha de Associação - SESCON</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body>
+  <div class="container">
+    <h1>Ficha de Associação - SESCON</h1>
+
+    <form id="fichaForm">
+      <label>CNPJ</label>
+      <input type="text" name="cnpj" placeholder="Somente números">
+
+      <label>Razão Social</label>
+      <input type="text" name="razao" required>
+
+      <label>E-mail</label>
+      <input type="email" name="email" placeholder="contato@empresa.com">
+
+      <label>Telefone</label>
+      <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX">
+
+      <label>Endereço</label>
+      <input type="text" name="endereco">
+
+      <label>Plano</label>
+      <select name="plano">
+        <option value="Plano Prata">Plano Prata</option>
+        <option value="Plano Ouro Premium">Plano Ouro Premium</option>
+        <option value="Prata Aescon">Prata Aescon</option>
+      </select>
+
+      <label>Nome do Sócio</label>
+      <input type="text" name="nome_socio">
+
+      <label>CPF do Sócio</label>
+      <input type="text" name="cpf_socio">
+
+      <label>Forma de Pagamento</label>
+      <select name="forma_pagamento">
+        <option value="Parcelado">Parcelado</option>
+        <option value="À vista">À vista</option>
+      </select>
+
+      <label><input type="checkbox" name="termo_aceite" value="1"> Declaro estar ciente e de acordo com os termos de associação.</label>
+
+      <h3>Assinatura (use mouse ou touch)</h3>
+      <canvas id="signature-pad" width=600 height=200 style="border:1px solid #ccc;"></canvas>
+      <div class="sig-buttons">
+        <button type="button" id="clearBtn">Limpar Assinatura</button>
+      </div>
+
+      <button type="submit" id="sendBtn">Gerar PDF</button>
+    </form>
+
+    <div id="result" style="margin-top:20px;"></div>
+    <a id="downloadLink" style="display:none">📥 Baixar PDF</a>
+  </div>
+
+<script>
+  // Simple signature pad (mouse & touch)
+  const canvas = document.getElementById("signature-pad");
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+  let lastX = 0, lastY = 0;
+
+  function drawLine(x1,y1,x2,y2){
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  canvas.addEventListener("mousedown", (e) => {
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    lastX = e.clientX - rect.left;
+    lastY = e.clientY - rect.top;
+  });
+  canvas.addEventListener("mousemove", (e) => {
+    if(!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    drawLine(lastX,lastY,x,y);
+    lastX = x; lastY = y;
+  });
+  canvas.addEventListener("mouseup", () => drawing = false);
+  canvas.addEventListener("mouseout", () => drawing = false);
+
+  canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    lastX = t.clientX - rect.left;
+    lastY = t.clientY - rect.top;
+  }, {passive:false});
+  canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    if(!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    const x = t.clientX - rect.left;
+    const y = t.clientY - rect.top;
+    drawLine(lastX,lastY,x,y);
+    lastX = x; lastY = y;
+  }, {passive:false});
+  canvas.addEventListener("touchend", () => drawing = false);
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  });
+
+  document.getElementById("fichaForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const form = ev.target;
+    const formData = new FormData(form);
+    const json = {};
+    formData.forEach((v,k) => {
+      if(k === "termo_aceite") json[k] = true;
+      else json[k] = v;
+    });
+    // signature as dataURL
+    const dataURL = canvas.toDataURL("image/png");
+    json.signature = dataURL;
+
+    // Call backend (ajuste host/porta se necessário)
+    const resp = await fetch("http://localhost:8000/gerar-pdf", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(json)
+    });
+
+    if(resp.ok){
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.getElementById("downloadLink");
+      link.href = url;
+      link.download = "ficha_associacao.pdf";
+      link.style.display = "inline-block";
+      link.textContent = "📥 Baixar PDF gerado";
+      document.getElementById("result").textContent = "✅ PDF gerado com sucesso.";
+    } else {
+      const txt = await resp.text();
+      document.getElementById("result").textContent = "❌ Erro ao gerar PDF: " + txt;
+    }
+  });
+</script>
+</body>
+</html>

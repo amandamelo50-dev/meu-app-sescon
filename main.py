@@ -59,6 +59,42 @@ async def consultar_cnpj_endpoint(cnpj: str):
     else:
         print("CNPJ não encontrado")
         raise HTTPException(status_code=404, detail="CNPJ não encontrado ou inválido")
+        async def consultar_cnpj_automatico(cnpj: str):
+    """Consulta CNPJ na Receita Federal/BrasilAPI"""
+    cnpj_limpo = "".join(filter(str.isdigit, cnpj))
+    
+    if len(cnpj_limpo) != 14:
+        return None
+        
+    try:
+        response = requests.get(f"https://brasilapi.com.br/api/cnpj/v1/{cnpj_limpo}", timeout=10)
+        if response.status_code == 200:
+            dados = response.json()
+            
+            # Extrair sócios da empresa
+            socios = []
+            if 'qsa' in dados and dados['qsa']:
+                for socio in dados['qsa']:
+                    socios.append({
+                        'nome': socio.get('nome_socio', ''),
+                        'cpf': socio.get('cpf_representante_legal', ''),
+                        'qualificacao': socio.get('qualificacao_socio', '')
+                    })
+            
+            return {
+                'razao_social': dados.get('razao_social', ''),
+                'endereco': f"{dados.get('logradouro', '')}, {dados.get('numero', '')} - {dados.get('bairro', '')}",
+                'cidade': dados.get('municipio', ''),
+                'uf': dados.get('uf', ''),
+                'cnae': str(dados.get('cnae_fiscal', '')),
+                'socios': socios  # ← NOVO: Lista de sócios
+            }
+        else:
+            print(f"Erro na API Brasil: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"Erro na consulta CNPJ: {e}")
+        return None
 
 # ========== ROTA DE CÁLCULO DE VALORES ==========
 @app.get("/calcular-valores/{plano}")

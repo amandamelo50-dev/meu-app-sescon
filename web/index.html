@@ -205,24 +205,24 @@
     <form id="fichaForm">
       <h2>📋 Dados da Empresa</h2>
       
-      <label>CNPJ *</label>
-      <input type="text" name="cnpj" placeholder="Somente números" required maxlength="14">
+      <label for="cnpj">CNPJ *</label>
+      <input type="text" name="cnpj" id="cnpj" placeholder="Somente números" required maxlength="14">
 
-      <label>Razão Social *</label>
-      <input type="text" name="razao" placeholder="Nome completo da empresa" required>
+      <label for="razao">Razão Social *</label>
+      <input type="text" name="razao" id="razao" placeholder="Nome completo da empresa" required>
 
-      <label>E-mail *</label>
-      <input type="email" name="email" placeholder="contato@empresa.com" required>
+      <label for="email">E-mail *</label>
+      <input type="email" name="email" id="email" placeholder="contato@empresa.com" required>
 
-      <label>Telefone *</label>
-      <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX" required>
+      <label for="telefone">Telefone *</label>
+      <input type="text" name="telefone" id="telefone" placeholder="(11) 9XXXX-XXXX" required>
 
-      <label>Endereço Completo</label>
-      <input type="text" name="endereco" placeholder="Rua, número, complemento, cidade">
+      <label for="endereco">Endereço Completo</label>
+      <input type="text" name="endereco" id="endereco" placeholder="Rua, número, complemento, cidade">
 
       <h2>👥 Dados do Sócio/Responsável</h2>
 
-      <label>Quem está preenchendo este formulário? *</label>
+      <label for="tipoResponsavel">Quem está preenchendo este formulário? *</label>
       <select name="tipo_responsavel" id="tipoResponsavel" required>
         <option value="">Selecione...</option>
         <option value="socio">Sócio da empresa</option>
@@ -235,36 +235,36 @@
         <div id="listaSocios"></div>
         
         <div style="margin-top: 15px;">
-          <label>Nome do Sócio *</label>
-          <input type="text" name="nome_socio" placeholder="Nome completo do sócio" required>
+          <label for="nome_socio">Nome do Sócio *</label>
+          <input type="text" name="nome_socio" id="nome_socio" placeholder="Nome completo do sócio" required>
         </div>
 
         <div>
-          <label>CPF do Sócio *</label>
-          <input type="text" name="cpf_socio" placeholder="Somente números" required maxlength="11">
+          <label for="cpf_socio">CPF do Sócio *</label>
+          <input type="text" name="cpf_socio" id="cpf_socio" placeholder="Somente números" required maxlength="11">
         </div>
       </div>
 
       <!-- SEÇÃO OUTRO RESPONSÁVEL (inicialmente oculta) -->
       <div id="secaoOutroResponsavel" class="hidden">
         <div>
-          <label>Nome do Responsável pelo Preenchimento *</label>
-          <input type="text" name="nome_responsavel" placeholder="Nome completo do responsável">
+          <label for="nome_responsavel">Nome do Responsável pelo Preenchimento *</label>
+          <input type="text" name="nome_responsavel" id="nome_responsavel" placeholder="Nome completo do responsável">
         </div>
 
         <div>
-          <label>CPF do Responsável *</label>
-          <input type="text" name="cpf_responsavel" placeholder="Somente números" maxlength="11">
+          <label for="cpf_responsavel">CPF do Responsável *</label>
+          <input type="text" name="cpf_responsavel" id="cpf_responsavel" placeholder="Somente números" maxlength="11">
         </div>
 
         <div>
-          <label>Nome do Sócio Representado *</label>
-          <input type="text" name="nome_socio_representado" placeholder="Nome do sócio que está sendo representado" required>
+          <label for="nome_socio_representado">Nome do Sócio Representado *</label>
+          <input type="text" name="nome_socio_representado" id="nome_socio_representado" placeholder="Nome do sócio que está sendo representado" required>
         </div>
 
         <div>
-          <label>CPF do Sócio Representado *</label>
-          <input type="text" name="cpf_socio_representado" placeholder="CPF do sócio representado" required maxlength="11">
+          <label for="cpf_socio_representado">CPF do Sócio Representado *</label>
+          <input type="text" name="cpf_socio_representado" id="cpf_socio_representado" placeholder="CPF do sócio representado" required maxlength="11">
         </div>
       </div>
 
@@ -288,12 +288,19 @@
         <div class="servico-option" data-value="parcerias">Parcerias</div>
         <div class="servico-option" data-value="coworking">Coworking/Endereço Fiscal</div>
       </div>
-      <input type="hidden" name="servico" id="servicoSelecionado" required>
+      <input type="hidden" name="servico" id="servicoSelecionado" required title="Serviço de interesse selecionado">
 
       <h2>📊 Plano de Associação</h2>
       <div id="planoSugeridoSection">
-        <label>Plano Sugerido (baseado na atividade e região)</label>
-        <input type="text" name="plano_sugerido" id="planoSugerido" readonly style="background: #f0f0f0;">
+        <label for="planoSugerido">Plano Sugerido (baseado na atividade e região) *</label>
+        <input type="text" 
+               name="plano_sugerido" 
+               id="planoSugerido" 
+               readonly 
+               style="background: #f0f0f0;"
+               placeholder="O plano será sugerido automaticamente após consulta do CNPJ"
+               title="Plano de associação sugerido baseado no CNAE e localização da empresa"
+               required>
         <div id="valoresSection" class="valores-section hidden">
           <!-- Valores serão inseridos aqui via JavaScript -->
         </div>
@@ -306,13 +313,13 @@
           <div class="servico-option" data-value="avista">À Vista</div>
           <div class="servico-option" data-value="parcelado">Parcelado</div>
         </div>
-        <input type="hidden" name="forma_pagamento" id="formaPagamentoSelecionada" required>
+        <input type="hidden" name="forma_pagamento" id="formaPagamentoSelecionada" required title="Forma de pagamento selecionada">
       </div>
 
       <h2>✍️ Assinatura</h2>
       
-      <label>Assinatura do Sócio/Responsável (use mouse ou toque)</label>
-      <canvas id="signature-pad" width="600" height="200"></canvas>
+      <label for="signature-pad">Assinatura do Sócio/Responsável (use mouse ou toque) *</label>
+      <canvas id="signature-pad" width="600" height="200" title="Área para assinatura digital"></canvas>
       <div style="text-align: center; margin-top: 10px;">
         <button type="button" id="clearBtn" class="secondary-btn">Limpar Assinatura</button>
       </div>
@@ -606,19 +613,23 @@
         }
     });
 
-    // ========== ENVIO DO FORMULÁRIO ==========
+    // ========== ENVIO DO FORMULÁRIO (VERSÃO DEBUG) ==========
     document.getElementById("fichaForm").addEventListener("submit", async (ev) => {
         ev.preventDefault();
+        console.log("📍 Formulário submetido - Iniciando processo...");
+        
         const form = ev.target;
         const sendBtn = document.getElementById("sendBtn");
         const resultDiv = document.getElementById("result");
 
         // Validar campos obrigatórios
+        console.log("📍 Validando campos obrigatórios...");
         const requiredFields = form.querySelectorAll('[required]');
         let isValid = true;
         
         requiredFields.forEach(field => {
             if (!field.value.trim()) {
+                console.log(`❌ Campo obrigatório vazio: ${field.name}`);
                 field.style.borderColor = 'red';
                 isValid = false;
             } else {
@@ -627,25 +638,39 @@
         });
 
         // Validar serviço selecionado
-        if (!document.getElementById('servicoSelecionado').value) {
+        const servicoSelecionado = document.getElementById('servicoSelecionado').value;
+        if (!servicoSelecionado) {
+            console.log("❌ Nenhum serviço selecionado");
             mostrarMensagem('❌ Selecione um serviço de interesse', 'error');
             isValid = false;
         }
 
         // Validar forma de pagamento
-        if (!document.getElementById('formaPagamentoSelecionada').value) {
+        const formaPagamento = document.getElementById('formaPagamentoSelecionada').value;
+        if (!formaPagamento) {
+            console.log("❌ Nenhuma forma de pagamento selecionada");
             mostrarMensagem('❌ Selecione a forma de pagamento', 'error');
             isValid = false;
         }
 
+        // Validar assinatura
+        const signatureData = canvas.toDataURL();
+        const blankSignature = canvas.constructor.prototype.toDataURL.call(canvas);
+        if (signatureData === blankSignature) {
+            console.log("❌ Assinatura não preenchida");
+            mostrarMensagem('❌ Faça sua assinatura no campo indicado', 'error');
+            isValid = false;
+        }
+
         if (!isValid) {
-            resultDiv.textContent = "❌ Preencha todos os campos obrigatórios";
+            resultDiv.textContent = "❌ Corrija os erros acima para continuar";
             resultDiv.style.color = "red";
             resultDiv.style.backgroundColor = "#ffe6e6";
             return;
         }
 
         // Mostrar loading
+        console.log("📍 Preparando dados para envio...");
         sendBtn.textContent = "Gerando PDF...";
         sendBtn.disabled = true;
         resultDiv.textContent = "⏳ Gerando sua ficha...";
@@ -657,61 +682,94 @@
             email: form.email.value,
             telefone: form.telefone.value,
             endereco: form.endereco.value,
-            servico: document.getElementById('servicoSelecionado').value,
+            servico: servicoSelecionado,
             plano: document.getElementById('planoSugerido').value,
-            forma_pagamento: document.getElementById('formaPagamentoSelecionada').value,
+            forma_pagamento: formaPagamento,
             termo_aceite: true,
-            signature: canvas.toDataURL()
+            signature: signatureData
         };
 
         // Adicionar dados do responsável baseado no tipo
         const tipoResponsavel = form.tipo_responsavel.value;
+        console.log(`📍 Tipo de responsável: ${tipoResponsavel}`);
+        
         if (tipoResponsavel === 'socio') {
             json.nome_socio = form.nome_socio.value;
             json.cpf_socio = form.cpf_socio.value;
             json.tipo_resp = 'Sócio';
-        } else {
+            console.log("📍 Dados do sócio:", { nome: json.nome_socio, cpf: json.cpf_socio });
+        } else if (tipoResponsavel === 'outro') {
             json.nome_socio = form.nome_socio_representado.value;
             json.cpf_socio = form.cpf_socio_representado.value;
             json.nome_outro = form.nome_responsavel.value;
             json.contato_outro = form.cpf_responsavel.value;
             json.tipo_resp = 'Outro Responsável';
+            console.log("📍 Dados do responsável:", { 
+                socio_representado: json.nome_socio,
+                responsavel: json.nome_outro 
+            });
+        } else {
+            console.log("❌ Tipo de responsável não selecionado");
+            mostrarMensagem('❌ Selecione quem está preenchendo o formulário', 'error');
+            sendBtn.textContent = "Gerar PDF da Ficha";
+            sendBtn.disabled = false;
+            return;
         }
 
+        console.log("📍 Dados completos para envio:", json);
+
         try {
+            console.log("📍 Enviando requisição para o backend...");
             const resp = await fetch("https://meu-app-sescon.onrender.com/gerar-pdf", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/pdf"
+                },
                 body: JSON.stringify(json)
             });
 
+            console.log("📍 Resposta recebida. Status:", resp.status);
+
             if (resp.ok) {
+                console.log("✅ PDF gerado com sucesso no backend");
                 const blob = await resp.blob();
-                const url = URL.createObjectURL(blob);
-                const link = document.getElementById("downloadLink");
-                link.href = url;
-                link.download = "ficha_associacao_sescon.pdf";
-                link.style.display = "block";
+                console.log("📍 Blob criado. Tamanho:", blob.size, "bytes");
                 
-                resultDiv.textContent = "✅ PDF gerado com sucesso!";
-                resultDiv.style.color = "green";
-                resultDiv.style.backgroundColor = "#e6ffe6";
-                mostrarMensagem('✅ Ficha gerada com sucesso!', 'success');
+                if (blob.size > 0) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.getElementById("downloadLink");
+                    link.href = url;
+                    link.download = `ficha_associacao_${json.razao.replace(/\s+/g, '_')}.pdf`;
+                    link.style.display = "block";
+                    
+                    resultDiv.textContent = "✅ PDF gerado com sucesso! Clique no link acima para baixar.";
+                    resultDiv.style.color = "green";
+                    resultDiv.style.backgroundColor = "#e6ffe6";
+                    mostrarMensagem('✅ Ficha gerada com sucesso!', 'success');
+                    
+                    console.log("✅ Download link criado e exibido");
+                } else {
+                    throw new Error("PDF vazio recebido do servidor");
+                }
             } else {
                 const errorText = await resp.text();
-                resultDiv.textContent = "❌ Erro ao gerar PDF";
+                console.error("❌ Erro do backend:", errorText);
+                resultDiv.textContent = "❌ Erro ao gerar PDF: " + errorText;
                 resultDiv.style.color = "red";
                 resultDiv.style.backgroundColor = "#ffe6e6";
                 mostrarMensagem('❌ Erro ao gerar PDF', 'error');
             }
         } catch (error) {
-            resultDiv.textContent = "❌ Erro de conexão";
+            console.error("❌ Erro de conexão:", error);
+            resultDiv.textContent = "❌ Erro de conexão: " + error.message;
             resultDiv.style.color = "red";
             resultDiv.style.backgroundColor = "#ffe6e6";
-            mostrarMensagem('❌ Erro de conexão', 'error');
+            mostrarMensagem('❌ Erro de conexão: ' + error.message, 'error');
         } finally {
             sendBtn.textContent = "Gerar PDF da Ficha";
             sendBtn.disabled = false;
+            console.log("📍 Processo finalizado");
         }
     });
   </script>

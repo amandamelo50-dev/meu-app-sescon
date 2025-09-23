@@ -260,10 +260,14 @@
 
     // ========== CONSULTA AUTOMÁTICA DE CNPJ ==========
     async function consultarCNPJ(cnpj) {
+        console.log(`Consultando CNPJ: ${cnpj}`);
+        
         try {
             const response = await fetch(`https://meu-app-sescon.onrender.com/consultar-cnpj/${cnpj}`);
+            
             if (response.ok) {
                 const dados = await response.json();
+                console.log('Dados recebidos:', dados);
                 
                 // Preencher campos automaticamente
                 if (dados.razao_social) {
@@ -273,27 +277,140 @@
                     document.querySelector('input[name="endereco"]').value = dados.endereco;
                 }
                 
-                mostrarMensagem('✅ Dados preenchidos automaticamente!');
+                mostrarMensagem('✅ Dados preenchidos automaticamente!', 'success');
+                
+                // Agora sugerir o plano
+                await sugerirPlano(cnpj);
+                
+            } else if (response.status === 404) {
+                mostrarMensagem('⚠️ CNPJ não encontrado. Preencha manualmente.', 'warning');
+            } else {
+                mostrarMensagem('❌ Erro na consulta. Tente novamente.', 'error');
             }
         } catch (error) {
-            console.log('CNPJ não encontrado');
-            mostrarMensagem('⚠️ CNPJ não encontrado. Preencha manualmente.');
+            console.error('Erro na consulta:', error);
+            mostrarMensagem('❌ Erro de conexão. Verifique a internet.', 'error');
         }
     }
 
-    // ========== FUNÇÃO SIMPLES PARA MENSAGENS ==========
-    function mostrarMensagem(mensagem) {
+    // ========== SUGERIR PLANO ==========
+    async function sugerirPlano(cnpj) {
+        try {
+            const response = await fetch(`https://meu-app-sescon.onrender.com/sugerir-plano/${cnpj}`);
+            
+            if (response.ok) {
+                const dados = await response.json();
+                console.log('Plano sugerido:', dados);
+                
+                if (dados.plano && !dados.error) {
+                    // Encontrar a opção correspondente no select
+                    const selectPlano = document.querySelector('select[name="plano"]');
+                    const opcoes = Array.from(selectPlano.options);
+                    const opcaoEncontrada = opcoes.find(opcao => 
+                        opcao.text.includes(dados.plano) || 
+                        dados.plano.includes(opcao.text)
+                    );
+                    
+                    if (opcaoEncontrada) {
+                        selectPlano.value = opcaoEncontrada.value;
+                        mostrarMensagem(`📊 Plano sugerido: ${dados.plano}`, 'info');
+                        
+                        // Calcular valores do plano
+                        await calcularValores(opcaoEncontrada.value);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao sugerir plano:', error);
+        }
+    }
+
+    // ========== CALCULAR VALORES ==========
+    async function calcularValores(plano) {
+        try {
+            const response = await fetch(`https://meu-app-sescon.onrender.com/calcular-valores/${plano}`);
+            
+            if (response.ok) {
+                const valores = await response.json();
+                console.log('Valores calculados:', valores);
+                
+                // Criar ou atualizar seção de valores
+                exibirValores(valores, plano);
+                
+            }
+        } catch (error) {
+            console.error('Erro ao calcular valores:', error);
+        }
+    }
+
+    // ========== EXIBIR VALORES NA TELA ==========
+    function exibirValores(valores, plano) {
+        let valoresSection = document.getElementById('valores-section');
+        
+        if (!valoresSection) {
+            valoresSection = document.createElement('div');
+            valoresSection.id = 'valores-section';
+            valoresSection.style.cssText = `
+                background: #f8f9fa; 
+                padding: 15px; 
+                border-radius: 8px; 
+                margin: 15px 0;
+                border-left: 4px solid #8B0000;
+            `;
+            
+            // Inserir após o select de plano
+            const planoSelect = document.querySelector('select[name="plano"]');
+            planoSelect.closest('div').appendChild(valoresSection);
+        }
+        
+        valoresSection.innerHTML = `
+            <h3 style="margin-top: 0; color: #8B0000;">💳 Valores do ${plano}</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <strong>À Vista:</strong><br>
+                    <span style="font-size: 1.2em; color: #28a745; font-weight: bold;">${valores.a_vista}</span>
+                </div>
+                <div>
+                    <strong>Parcelado:</strong><br>
+                    <span style="font-size: 1.1em; color: #007bff;">${valores.parcelado}</span>
+                </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                💡 Valores proporcionais referentes ao mês atual
+            </div>
+        `;
+    }
+
+    // ========== FUNÇÃO PARA MENSAGENS ==========
+    function mostrarMensagem(mensagem, tipo = 'info') {
+        // Remover mensagem anterior
+        const mensagemAnterior = document.getElementById('mensagem-flutuante');
+        if (mensagemAnterior) {
+            mensagemAnterior.remove();
+        }
+        
+        const cores = {
+            'success': '#28a745',
+            'warning': '#ffc107', 
+            'error': '#dc3545',
+            'info': '#17a2b8'
+        };
+        
         const mensagemDiv = document.createElement('div');
+        mensagemDiv.id = 'mensagem-flutuante';
         mensagemDiv.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #28a745;
+            background: ${cores[tipo]};
             color: white;
-            padding: 10px 15px;
+            padding: 12px 18px;
             border-radius: 5px;
             z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-weight: 600;
         `;
+        
         mensagemDiv.textContent = mensagem;
         document.body.appendChild(mensagemDiv);
         
@@ -301,7 +418,7 @@
             if (mensagemDiv.parentNode) {
                 mensagemDiv.remove();
             }
-        }, 3000);
+        }, 4000);
     }
 
     // ========== EVENTOS PRINCIPAIS ==========
@@ -312,6 +429,11 @@
         if (cnpj.length === 14) {
             consultarCNPJ(cnpj);
         }
+    });
+
+    // Calcular valores quando mudar o plano manualmente
+    document.querySelector('select[name="plano"]').addEventListener('change', function() {
+        calcularValores(this.value);
     });
 
     // Validação de CNPJ em tempo real
@@ -378,27 +500,30 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.getElementById("downloadLink");
                 link.href = url;
-                link.download = "ficha_associacao.pdf";
+                link.download = "ficha_associacao_sescon.pdf";
                 link.style.display = "block";
                 
                 resultDiv.textContent = "✅ PDF gerado com sucesso!";
                 resultDiv.style.color = "green";
                 resultDiv.style.backgroundColor = "#e6ffe6";
+                mostrarMensagem('✅ Ficha gerada com sucesso!', 'success');
             } else {
                 const errorText = await resp.text();
                 resultDiv.textContent = "❌ Erro ao gerar PDF";
                 resultDiv.style.color = "red";
                 resultDiv.style.backgroundColor = "#ffe6e6";
+                mostrarMensagem('❌ Erro ao gerar PDF', 'error');
             }
         } catch (error) {
             resultDiv.textContent = "❌ Erro de conexão";
             resultDiv.style.color = "red";
             resultDiv.style.backgroundColor = "#ffe6e6";
+            mostrarMensagem('❌ Erro de conexão', 'error');
         } finally {
             sendBtn.textContent = "Gerar PDF da Ficha";
             sendBtn.disabled = false;
         }
     });
-  </script>
+</script>
 </body>
 </html>

@@ -345,6 +345,9 @@
     let drawing = false;
     let lastX = 0, lastY = 0;
 
+    // Configurar fundo branco para o canvas
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "#8B0000";
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
@@ -377,7 +380,9 @@
     canvas.addEventListener("mouseout", () => drawing = false);
 
     document.getElementById("clearBtn").addEventListener("click", () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#8B0000";
     });
 
     // ========== SELEÇÃO DE SERVIÇO ==========
@@ -598,10 +603,20 @@
         if (!document.getElementById('formaPagamentoSelecionada').value) errors.push('Selecione a forma de pagamento');
         if (!document.getElementById('planoSugerido').value) errors.push('Plano não foi sugerido - verifique o CNPJ');
 
-        // Validar assinatura
-        const signatureData = canvas.toDataURL();
-        const blankSignature = canvas.constructor.prototype.toDataURL.call(canvas);
-        if (signatureData === blankSignature) errors.push('Faça sua assinatura');
+        // VALIDAÇÃO CORRIGIDA DA ASSINATURA
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let hasSignature = false;
+
+        for (let i = 0; i < imageData.length; i += 4) {
+            if (imageData[i] < 255 || imageData[i + 1] < 255 || imageData[i + 2] < 255) {
+                hasSignature = true;
+                break;
+            }
+        }
+
+        if (!hasSignature) {
+            errors.push('Faça sua assinatura no campo indicado');
+        }
 
         if (errors.length > 0) {
             resultDiv.innerHTML = `<div class="error">❌ ${errors.join('<br>❌ ')}</div>`;
@@ -624,7 +639,7 @@
             plano: document.getElementById('planoSugerido').value,
             forma_pagamento: document.getElementById('formaPagamentoSelecionada').value,
             termo_aceite: true,
-            signature: signatureData
+            signature: canvas.toDataURL()
         };
 
         // Dados do responsável

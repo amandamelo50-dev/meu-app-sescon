@@ -6,38 +6,43 @@
   <style>
     body { 
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+        background: #f8f9fa; /* Fundo cinza claro igual ao site do SESCON */
         color: #333;
         margin: 0;
-        padding: 20px;
+        padding: 0;
         min-height: 100vh;
     }
 
     .container { 
         max-width: 900px;
-        margin: 30px auto;
+        margin: 0 auto;
         background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        position: relative;
+        padding: 0;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    .container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #8B0000, #FFD700, #8B0000);
-    }
-
-    h1 {
+    /* HEADER IGUAL AO SITE DO SESCON */
+    .header-sescon {
+        background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+        padding: 20px 0;
         text-align: center;
-        color: #8B0000;
-        font-size: 2.2em;
-        margin-bottom: 10px;
+        color: white;
+    }
+
+    .header-sescon h1 {
+        margin: 0;
+        font-size: 2.5em;
+        font-weight: bold;
+    }
+
+    .header-sescon p {
+        margin: 10px 0 0 0;
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .form-content {
+        padding: 30px;
     }
 
     h2 {
@@ -175,180 +180,195 @@
     }
 
     .servico-option {
-        padding: 10px;
+        padding: 15px;
         border: 2px solid #ddd;
-        border-radius: 5px;
+        border-radius: 8px;
         cursor: pointer;
         text-align: center;
         transition: all 0.3s;
+        background: white;
+    }
+
+    .servico-option:hover {
+        border-color: #8B0000;
+        transform: translateY(-2px);
     }
 
     .servico-option.selected {
         border-color: #8B0000;
-        background: #e7f1ff;
+        background: #8B0000;
+        color: white;
+        transform: translateY(-2px);
     }
 
     .hidden {
         display: none;
     }
 
-    .success { color: green; background: #e6ffe6; }
-    .error { color: red; background: #ffe6e6; }
+    .success { color: green; background: #e6ffe6; padding: 15px; border-radius: 8px; }
+    .error { color: red; background: #ffe6e6; padding: 15px; border-radius: 8px; }
   </style>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 </head>
 <body>
   <div class="container">
-    <h1>Ficha de Associação - SESCON-SP</h1>
-    <p style="text-align: center; color: #666; margin-bottom: 30px;">
-      Preencha os dados abaixo para gerar sua ficha de associação
-    </p>
+    <!-- HEADER IGUAL AO SITE DO SESCON -->
+    <div class="header-sescon">
+        <h1>Ficha de Associação</h1>
+        <p>SESCON-SP - Sindicato das Empresas de Serviços Contábeis</p>
+    </div>
 
-    <form id="fichaForm">
-      <h2>📋 Dados da Empresa</h2>
-      
-      <label for="cnpj">CNPJ *</label>
-      <input type="text" name="cnpj" id="cnpj" placeholder="Somente números" required maxlength="14">
+    <div class="form-content">
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Preencha os dados abaixo para gerar sua ficha de associação
+        </p>
 
-      <label for="razao">Razão Social *</label>
-      <input type="text" name="razao" id="razao" placeholder="Nome completo da empresa" required>
+        <form id="fichaForm">
+            <h2>📋 Dados da Empresa</h2>
+            
+            <label for="cnpj">CNPJ *</label>
+            <input type="text" name="cnpj" id="cnpj" placeholder="Somente números" required maxlength="14">
 
-      <label for="email">E-mail *</label>
-      <input type="email" name="email" id="email" placeholder="contato@empresa.com" required>
+            <label for="razao">Razão Social *</label>
+            <input type="text" name="razao" id="razao" placeholder="Nome completo da empresa" required>
 
-      <label for="telefone">Telefone *</label>
-      <input type="text" name="telefone" id="telefone" placeholder="(11) 9XXXX-XXXX" required>
+            <label for="email">E-mail *</label>
+            <input type="email" name="email" id="email" placeholder="contato@empresa.com" required>
 
-      <label for="endereco">Endereço Completo</label>
-      <input type="text" name="endereco" id="endereco" placeholder="Rua, número, complemento, cidade">
+            <label for="telefone">Telefone *</label>
+            <input type="text" name="telefone" id="telefone" placeholder="(11) 9XXXX-XXXX" required>
 
-      <h2>👥 Dados do Sócio/Responsável</h2>
+            <label for="endereco">Endereço Completo</label>
+            <input type="text" name="endereco" id="endereco" placeholder="Rua, número, complemento, cidade">
 
-      <label for="tipoResponsavel">Quem está preenchendo este formulário? *</label>
-      <select name="tipo_responsavel" id="tipoResponsavel" required>
-        <option value="">Selecione...</option>
-        <option value="socio">Sócio da empresa</option>
-        <option value="outro">Outro responsável</option>
-      </select>
+            <h2>👥 Dados do Sócio/Responsável</h2>
 
-      <!-- SEÇÃO SÓCIO -->
-      <div id="secaoSocio" class="hidden">
-        <h3>Selecione o Sócio</h3>
-        <div id="listaSocios"></div>
-        
-        <div style="margin-top: 15px;">
-          <label for="nome_socio">Nome do Sócio *</label>
-          <input type="text" name="nome_socio" id="nome_socio" placeholder="Nome completo do sócio">
+            <label for="tipoResponsavel">Quem está preenchendo este formulário? *</label>
+            <select name="tipo_responsavel" id="tipoResponsavel" required>
+                <option value="">Selecione...</option>
+                <option value="socio">Sócio da empresa</option>
+                <option value="outro">Outro responsável</option>
+            </select>
+
+            <!-- SEÇÃO SÓCIO -->
+            <div id="secaoSocio" class="hidden">
+                <h3>Selecione o Sócio</h3>
+                <div id="listaSocios"></div>
+                
+                <div style="margin-top: 15px;">
+                    <label for="nome_socio">Nome do Sócio *</label>
+                    <input type="text" name="nome_socio" id="nome_socio" placeholder="Nome completo do sócio">
+                </div>
+
+                <div>
+                    <label for="cpf_socio">CPF do Sócio *</label>
+                    <input type="text" name="cpf_socio" id="cpf_socio" placeholder="Somente números" maxlength="11">
+                </div>
+            </div>
+
+            <!-- SEÇÃO OUTRO RESPONSÁVEL -->
+            <div id="secaoOutroResponsavel" class="hidden">
+                <div>
+                    <label for="nome_responsavel">Nome do Responsável pelo Preenchimento *</label>
+                    <input type="text" name="nome_responsavel" id="nome_responsavel" placeholder="Nome completo do responsável">
+                </div>
+
+                <div>
+                    <label for="cpf_responsavel">CPF do Responsável</label>
+                    <input type="text" name="cpf_responsavel" id="cpf_responsavel" placeholder="Somente números" maxlength="11">
+                </div>
+
+                <div>
+                    <label for="nome_socio_representado">Nome do Sócio Representado *</label>
+                    <input type="text" name="nome_socio_representado" id="nome_socio_representado" placeholder="Nome do sócio que está sendo representado">
+                </div>
+
+                <div>
+                    <label for="cpf_socio_representado">CPF do Sócio Representado *</label>
+                    <input type="text" name="cpf_socio_representado" id="cpf_socio_representado" placeholder="CPF do sócio representado" maxlength="11">
+                </div>
+            </div>
+
+            <h2>💼 Serviço de Interesse</h2>
+            <label>Qual serviço você está buscando? *</label>
+            <div class="servico-grid" id="servicoGrid">
+                <div class="servico-option" data-value="institucional">Institucional</div>
+                <div class="servico-option" data-value="bolsa_talentos">Bolsa de Talentos</div>
+                <div class="servico-option" data-value="convencao_coletiva">Convenção Coletiva</div>
+                <div class="servico-option" data-value="cursos">Cursos UniSESCON</div>
+                <div class="servico-option" data-value="consultoria_juridica">Consultoria Jurídica</div>
+                <div class="servico-option" data-value="central_servicos">Central de Serviços</div>
+                <div class="servico-option" data-value="certificado_digital">Certificado Digital</div>
+                <div class="servico-option" data-value="contabil_store">Contabil Store</div>
+                <div class="servico-option" data-value="pesquisas">Pesquisas</div>
+                <div class="servico-option" data-value="societario_legal">Societário e Legal</div>
+                <div class="servico-option" data-value="lgpd">Projeto LGPD</div>
+                <div class="servico-option" data-value="pqec">PQEC</div>
+                <div class="servico-option" data-value="eventos">Eventos</div>
+                <div class="servico-option" data-value="auditorio">Locação de Auditório</div>
+                <div class="servico-option" data-value="parcerias">Parcerias</div>
+                <div class="servico-option" data-value="coworking">Coworking/Endereço Fiscal</div>
+            </div>
+            <input type="hidden" name="servico" id="servicoSelecionado">
+
+            <h2>📊 Plano de Associação</h2>
+            <div id="planoSugeridoSection">
+                <label for="planoSugerido">Plano Sugerido (baseado na atividade e região) *</label>
+                <input type="text" name="plano_sugerido" id="planoSugerido" readonly 
+                    style="background: #f0f0f0;"
+                    placeholder="O plano será sugerido automaticamente após consulta do CNPJ"
+                    required>
+                <div id="valoresSection" class="valores-section hidden"></div>
+            </div>
+
+            <h2>💳 Forma de Pagamento</h2>
+            <div id="formaPagamentoSection" class="hidden">
+                <label>Selecione a forma de pagamento *</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="servico-option" data-value="avista">À Vista</div>
+                    <div class="servico-option" data-value="parcelado">Parcelado</div>
+                </div>
+                <input type="hidden" name="forma_pagamento" id="formaPagamentoSelecionada">
+            </div>
+
+            <h2>✍️ Assinatura</h2>
+            
+            <label for="signature-pad">Assinatura do Sócio/Responsável (use mouse ou toque) *</label>
+            <canvas id="signature-pad" width="600" height="200"></canvas>
+            <div style="text-align: center; margin-top: 10px;">
+                <button type="button" id="clearBtn" class="secondary-btn">Limpar Assinatura</button>
+            </div>
+
+            <label style="margin-top: 20px;">
+                <input type="checkbox" name="termo_aceite" value="1" required> 
+                Declaro estar ciente e de acordo com os termos de associação. *
+            </label>
+
+            <button type="submit" id="sendBtn">Gerar PDF da Ficha</button>
+        </form>
+
+        <div id="result"></div>
+        <a id="downloadLink" style="display:none">📥 Baixar PDF Gerado</a>
+
+        <!-- FOOTER LGPD -->
+        <div class="lgpd-footer">
+            <strong>O Sescon-SP informa que, em respeito aos preceitos elencados no art. 6º da LGPD e, em especial, ao Princípio da Finalidade, a coleta dos dados pessoais dispostos neste formulário, será pautada na hipótese de tratamento prevista no inciso IX do Art. 7º da Lei nº 13.709/18.</strong><br><br>
+            Saiba mais: <a href="https://sescon.org.br/wp-content/uploads/2025/05/POLITICA-DE-PRIVACIDADE-E-COOKIES-1.pdf" target="_blank">Política de Privacidade e Cookies</a>
         </div>
-
-        <div>
-          <label for="cpf_socio">CPF do Sócio *</label>
-          <input type="text" name="cpf_socio" id="cpf_socio" placeholder="Somente números" maxlength="11">
-        </div>
-      </div>
-
-      <!-- SEÇÃO OUTRO RESPONSÁVEL -->
-      <div id="secaoOutroResponsavel" class="hidden">
-        <div>
-          <label for="nome_responsavel">Nome do Responsável pelo Preenchimento *</label>
-          <input type="text" name="nome_responsavel" id="nome_responsavel" placeholder="Nome completo do responsável">
-        </div>
-
-        <div>
-          <label for="cpf_responsavel">CPF do Responsável</label>
-          <input type="text" name="cpf_responsavel" id="cpf_responsavel" placeholder="Somente números" maxlength="11">
-        </div>
-
-        <div>
-          <label for="nome_socio_representado">Nome do Sócio Representado *</label>
-          <input type="text" name="nome_socio_representado" id="nome_socio_representado" placeholder="Nome do sócio que está sendo representado">
-        </div>
-
-        <div>
-          <label for="cpf_socio_representado">CPF do Sócio Representado *</label>
-          <input type="text" name="cpf_socio_representado" id="cpf_socio_representado" placeholder="CPF do sócio representado" maxlength="11">
-        </div>
-      </div>
-
-      <h2>💼 Serviço de Interesse</h2>
-      <label>Qual serviço você está buscando? *</label>
-      <div class="servico-grid">
-        <div class="servico-option" data-value="institucional">Institucional</div>
-        <div class="servico-option" data-value="bolsa_talentos">Bolsa de Talentos</div>
-        <div class="servico-option" data-value="convencao_coletiva">Convenção Coletiva</div>
-        <div class="servico-option" data-value="cursos">Cursos UniSESCON</div>
-        <div class="servico-option" data-value="consultoria_juridica">Consultoria Jurídica</div>
-        <div class="servico-option" data-value="central_servicos">Central de Serviços</div>
-        <div class="servico-option" data-value="certificado_digital">Certificado Digital</div>
-        <div class="servico-option" data-value="contabil_store">Contabil Store</div>
-        <div class="servico-option" data-value="pesquisas">Pesquisas</div>
-        <div class="servico-option" data-value="societario_legal">Societário e Legal</div>
-        <div class="servico-option" data-value="lgpd">Projeto LGPD</div>
-        <div class="servico-option" data-value="pqec">PQEC</div>
-        <div class="servico-option" data-value="eventos">Eventos</div>
-        <div class="servico-option" data-value="auditorio">Locação de Auditório</div>
-        <div class="servico-option" data-value="parcerias">Parcerias</div>
-        <div class="servico-option" data-value="coworking">Coworking/Endereço Fiscal</div>
-      </div>
-      <input type="hidden" name="servico" id="servicoSelecionado">
-
-      <h2>📊 Plano de Associação</h2>
-      <div id="planoSugeridoSection">
-        <label for="planoSugerido">Plano Sugerido (baseado na atividade e região) *</label>
-        <input type="text" name="plano_sugerido" id="planoSugerido" readonly 
-               style="background: #f0f0f0;"
-               placeholder="O plano será sugerido automaticamente após consulta do CNPJ"
-               required>
-        <div id="valoresSection" class="valores-section hidden"></div>
-      </div>
-
-      <h2>💳 Forma de Pagamento</h2>
-      <div id="formaPagamentoSection" class="hidden">
-        <label>Selecione a forma de pagamento *</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div class="servico-option" data-value="avista">À Vista</div>
-          <div class="servico-option" data-value="parcelado">Parcelado</div>
-        </div>
-        <input type="hidden" name="forma_pagamento" id="formaPagamentoSelecionada">
-      </div>
-
-      <h2>✍️ Assinatura</h2>
-      
-      <label for="signature-pad">Assinatura do Sócio/Responsável (use mouse ou toque) *</label>
-      <canvas id="signature-pad" width="600" height="200"></canvas>
-      <div style="text-align: center; margin-top: 10px;">
-        <button type="button" id="clearBtn" class="secondary-btn">Limpar Assinatura</button>
-      </div>
-
-      <label style="margin-top: 20px;">
-        <input type="checkbox" name="termo_aceite" value="1" required> 
-        Declaro estar ciente e de acordo com os termos de associação. *
-      </label>
-
-      <button type="submit" id="sendBtn">Gerar PDF da Ficha</button>
-    </form>
-
-    <div id="result"></div>
-    <a id="downloadLink" style="display:none">📥 Baixar PDF Gerado</a>
-
-    <!-- FOOTER LGPD -->
-    <div class="lgpd-footer">
-      <strong>O Sescon-SP informa que, em respeito aos preceitos elencados no art. 6º da LGPD e, em especial, ao Princípio da Finalidade, a coleta dos dados pessoais dispostos neste formulário, será pautada na hipótese de tratamento prevista no inciso IX do Art. 7º da Lei nº 13.709/18.</strong><br><br>
-      Saiba mais: <a href="https://sescon.org.br/wp-content/uploads/2025/05/POLITICA-DE-PRIVACIDADE-E-COOKIES-1.pdf" target="_blank">Política de Privacidade e Cookies</a>
     </div>
   </div>
 
   <script>
-    // ========== CONFIGURAÇÃO DA ASSINATURA ==========
+    // ========== CONFIGURAÇÃO DA ASSINATURA (PRETA) ==========
     const canvas = document.getElementById("signature-pad");
     const ctx = canvas.getContext("2d");
     let drawing = false;
     let lastX = 0, lastY = 0;
 
-    // Configurar fundo branco para o canvas
+    // Configurar fundo branco e assinatura PRETA
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#8B0000";
+    ctx.strokeStyle = "#000000"; // PRETA
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
 
@@ -382,30 +402,44 @@
     document.getElementById("clearBtn").addEventListener("click", () => {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "#8B0000";
+        ctx.strokeStyle = "#000000"; // PRETA
     });
 
-    // ========== SELEÇÃO DE SERVIÇO ==========
-    document.querySelectorAll('.servico-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.servico-option').forEach(opt => {
-                opt.classList.remove('selected');
+    // ========== SELEÇÃO DE SERVIÇO (CORRIGIDA) ==========
+    function configurarServicos() {
+        const servicoOptions = document.querySelectorAll('#servicoGrid .servico-option');
+        
+        servicoOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remover seleção anterior
+                servicoOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Selecionar atual
+                this.classList.add('selected');
+                const servicoValue = this.getAttribute('data-value');
+                document.getElementById('servicoSelecionado').value = servicoValue;
+                
+                console.log('Serviço selecionado:', servicoValue);
             });
-            this.classList.add('selected');
-            document.getElementById('servicoSelecionado').value = this.getAttribute('data-value');
         });
-    });
+    }
 
     // ========== SELEÇÃO DE FORMA DE PAGAMENTO ==========
-    document.querySelectorAll('#formaPagamentoSection .servico-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('#formaPagamentoSection .servico-option').forEach(opt => {
-                opt.classList.remove('selected');
+    function configurarPagamento() {
+        const pagamentoOptions = document.querySelectorAll('#formaPagamentoSection .servico-option');
+        
+        pagamentoOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                pagamentoOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                document.getElementById('formaPagamentoSelecionada').value = this.getAttribute('data-value');
             });
-            this.classList.add('selected');
-            document.getElementById('formaPagamentoSelecionada').value = this.getAttribute('data-value');
         });
-    });
+    }
 
     // ========== ALTERAÇÃO ENTRE SÓCIO E OUTRO RESPONSÁVEL ==========
     document.getElementById('tipoResponsavel').addEventListener('change', function() {
@@ -531,6 +565,33 @@
         }
     }
 
+    // ========== INTEGRAÇÃO COM GOOGLE SHEETS ==========
+    async function salvarNoGoogleSheets(dados) {
+        try {
+            // URL do Google Apps Script (você vai criar isso depois)
+            const scriptURL = 'https://script.google.com/macros/s/SEU_SCRIPT_ID/exec';
+            
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            });
+            
+            if (response.ok) {
+                console.log('✅ Dados salvos no Google Sheets');
+                return true;
+            } else {
+                console.log('⚠️ Dados não salvos no Sheets, mas PDF gerado');
+                return false;
+            }
+        } catch (error) {
+            console.log('⚠️ Erro ao salvar no Sheets, mas PDF gerado:', error);
+            return false;
+        }
+    }
+
     // ========== FUNÇÃO PARA MENSAGENS ==========
     function mostrarMensagem(mensagem, tipo = 'info') {
         const mensagemAnterior = document.getElementById('mensagem-flutuante');
@@ -567,6 +628,12 @@
         }
     });
 
+    // ========== INICIALIZAÇÃO ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        configurarServicos();
+        configurarPagamento();
+    });
+
     // ========== ENVIO DO FORMULÁRIO CORRIGIDO ==========
     document.getElementById("fichaForm").addEventListener("submit", async (ev) => {
         ev.preventDefault();
@@ -576,7 +643,7 @@
         const sendBtn = document.getElementById("sendBtn");
         const resultDiv = document.getElementById("result");
 
-        // VALIDAÇÃO MANUAL (CORRIGIDA)
+        // VALIDAÇÃO MANUAL
         let isValid = true;
         const errors = [];
 
@@ -603,7 +670,7 @@
         if (!document.getElementById('formaPagamentoSelecionada').value) errors.push('Selecione a forma de pagamento');
         if (!document.getElementById('planoSugerido').value) errors.push('Plano não foi sugerido - verifique o CNPJ');
 
-        // VALIDAÇÃO CORRIGIDA DA ASSINATURA
+        // VALIDAÇÃO DA ASSINATURA
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         let hasSignature = false;
 
@@ -672,6 +739,9 @@
                 link.href = url;
                 link.download = `ficha_sescon_${json.razao.replace(/\s+/g, '_')}.pdf`;
                 link.style.display = "block";
+                
+                // SALVAR NO GOOGLE SHEETS (opcional - não bloqueia o processo)
+                salvarNoGoogleSheets(json);
                 
                 resultDiv.innerHTML = `<div class="success">✅ PDF gerado com sucesso! <a href="${url}" download style="color: #0066cc; text-decoration: underline;">📥 Clique aqui para baixar</a></div>`;
                 mostrarMensagem('✅ Ficha gerada com sucesso!', 'success');

@@ -1,14 +1,14 @@
 import os
 import base64
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
-from pdf_utils import gerar_pdf, segmentar, consultar_cnpj
+from pdf_utils import gerar_pdf, segmentar, consultar_cnpj, get_plano_info
 
 app = FastAPI(title="API Ficha SESCON")
 
-# CORS liberado para desenvolvimento local
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,32 +16,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/validar-dados")
-async def validar_dados_endpoint(request: Request):
+@app.get("/consultar-cnpj/{cnpj}")
+async def consultar_cnpj_endpoint(cnpj: str):
     """
-    Recebe os dados do formulário e retorna a segmentação do plano.
+    Consulta os dados de uma empresa a partir do CNPJ e sugere um plano.
     """
-    try:
-        data = await request.json()
-    except Exception:
-        return JSONResponse({"erro": "JSON inválido"}, status_code=400)
+    dados_empresa = consultar_cnpj(cnpj)
+    if not dados_empresa:
+        raise HTTPException(status_code=404, detail="CNPJ não encontrado ou inválido.")
 
-    cnpj = data.get("cnpj", "")
+    cnae = dados_empresa.get("cnae_fiscal")
+    cidade = dados_empresa.get("municipio")
+    uf = dados_empresa.get("uf")
     
-    consulta_cnpj = None
-    if cnpj:
-        consulta_cnpj = consultar_cnpj(cnpj)
+    plano_sugerido_nome = segmentar(cnae, cidade, uf)
+    plano_info = get_plano_info(plano_sugerido_nome)
     
-    cnae = consulta_cnpj.get("cnae_fiscal", "") if consulta_cnpj else data.get("cnae", "")
-    cidade = consulta_cnpj.get("municipio", "") if consulta_cnpj else data.get("cidade", "")
-    uf = consulta_cnpj.get("uf", "") if consulta_cnpj else data.get("uf", "")
-
-    plano_sugerido = segmentar(cnae, cidade, uf)
+    socios = dados_empresa.get("qsa", [])
     
-    if "Fora" in plano_sugerido or "CNAE fora" in plano_sugerido:
-        return JSONResponse({"status": "nao_qualificado", "mensagem": plano_sugerido})
-    else:
-        return JSONResponse({"status": "qualificado", "plano": plano_sugerido})
+    response_data = {
+        "razao_social": dados_empresa.get("razao_social"),
+        "endereco": f"{dados_empresa.get('logradouro', '')}, {dados_empresa.get('numero', '')}, {dados_empresa.get('bairro', '')} - {cidade}/{uf}",
+        "cnae": cnae,
+        "plano_sugerido": plano_sugerido_nome,
+        "valor_a_vista": plano_info.get('valor_a_vista'),
+        "valor_parcelado": plano_info.get('valor_parcelado'),
+        "socios": socios
+    }
+    
+    return JSONResponse(response_data)
 
 @app.post("/gerar-pdf")
 async def gerar_pdf_endpoint(request: Request):
@@ -52,30 +55,27 @@ async def gerar_pdf_endpoint(request: Request):
     try:
         data = await request.json()
     except Exception as e:
-        return JSONResponse({"erro": "JSON inválido ou inválido content-type"}, status_code=400)
+        return JSONResponse({"erro": "JSON inválido ou content-type inválido"}, status_code=400)
 
-    # Mapear campos para o dicionário que gerar_pdf espera
+    # Verifica se o plano sugerido é válido antes de prosseguir
+    plano_sugerido = data.get("plano", "")
+    if "Fora" in plano_sugerido or "CNAE fora" in plano_sugerido:
+        return JSONResponse({"erro": "Empresa não qualificada para a associação."}, status_code=400)
+    
     dados = {
         "CNPJ": data.get("cnpj",""),
         "Razão Social": data.get("razao",""),
         "Contato Empresa": data.get("email",""),
         "Telefone Empresa": data.get("telefone",""),
         "Endereço": data.get("endereco",""),
-        "Plano": data.get("plano",""),
-        "Serviço": data.get("servico",""),
-        "Tipo Responsavel": data.get("tipo_resp",""),
+        "Plano": plano_sugerido,
+        "Serviços de Interesse": ", ".join(data.get("servicos_interesse", [])),
         "Nome Socio PDF": data.get("nome_socio",""),
         "CPF Socio PDF": data.get("cpf_socio",""),
-        "Nome Outro Responsavel": data.get("nome_outro",""),
-        "Contato Outro Responsavel": data.get("contato_outro",""),
-        "CNAE Fiscal": data.get("cnae",""),
-        "Cidade": data.get("cidade",""),
-        "UF": data.get("uf",""),
         "Forma Pagamento": data.get("forma_pagamento",""),
         "Termo Aceite": "Sim" if data.get("termo_aceite", False) else "Não"
     }
 
-    # signature espera "data:image/png;base64,...."
     signature_data_url = data.get("signature", None)
     signature_path = None
     if signature_data_url:
@@ -91,7 +91,6 @@ async def gerar_pdf_endpoint(request: Request):
 
     pdf_path = gerar_pdf(dados, signature_path)
 
-    # limpa assinatura temporária
     if signature_path and os.path.exists(signature_path):
         try:
             os.remove(signature_path)

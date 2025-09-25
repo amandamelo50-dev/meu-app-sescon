@@ -45,7 +45,7 @@
       </select>
 
       <label>CPF do Sócio</label>
-      <input type="text" name="cpf_socio">
+      <input type="text" name="cpf_socio" placeholder="Opcional.">
 
       <label>Forma de Pagamento</label>
       <select name="forma_pagamento">
@@ -79,7 +79,6 @@
   const resultDiv = document.getElementById("result");
   const form = document.getElementById("fichaForm");
 
-  // Simple signature pad (mouse & touch)
   const canvas = document.getElementById("signature-pad");
   const ctx = canvas.getContext("2d");
   let drawing = false;
@@ -137,11 +136,11 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  // Função para buscar dados do CNPJ
   cnpjInput.addEventListener('input', async () => {
     const cnpj = cnpjInput.value.replace(/\D/g, '');
     if (cnpj.length === 14) {
       resultDiv.textContent = 'Buscando dados do CNPJ...';
+      sendBtn.disabled = true;
       try {
         const response = await fetch(`http://localhost:8000/consultar-cnpj/${cnpj}`);
         const data = await response.json();
@@ -159,7 +158,6 @@
             sendBtn.disabled = false;
           }
 
-          // Preenche a lista de sócios
           sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
           if (data.socios && data.socios.length > 0) {
             data.socios.forEach(socio => {
@@ -184,7 +182,7 @@
         sendBtn.disabled = true;
       }
     } else {
-        resultDiv.textContent = 'Digite 14 dígitos do CNPJ.';
+        resultDiv.textContent = 'Digite 14 dígitos do CNPJ para buscar os dados.';
         sendBtn.disabled = true;
     }
   });
@@ -207,8 +205,9 @@
     const dataURL = canvas.toDataURL("image/png");
     json.signature = dataURL;
 
-    // Use o plano já obtido pela consulta
     json.plano = planoInput.value;
+    json.razao = razaoInput.value;
+    json.endereco = enderecoInput.value;
 
     const resp = await fetch("http://localhost:8000/gerar-pdf", {
       method: "POST",

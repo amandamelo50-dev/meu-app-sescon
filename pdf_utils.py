@@ -96,6 +96,32 @@ def consultar_cnpj(cnpj):
         print("Erro ao consultar BrasilAPI:", e)
         return None
 
+def get_plano_info(plano):
+    """Retorna os valores do plano sugerido para o mês atual."""
+    mes_atual = datetime.now().month
+    tabela = {}
+    if plano == "Plano Prata":
+        tabela = prata_pricing
+    elif plano == "Plano Ouro Premium":
+        tabela = ouro_premium_pricing
+    elif plano == "Prata Aescon":
+        tabela = prata_aescon_pricing
+    else:
+        return {"valor_a_vista": "N/A", "valor_parcelado": "N/A"}
+
+    valores = tabela.get(mes_atual, {})
+    a_vista = valores.get('a_vista', 0.0)
+    total = valores.get('total', 0.0)
+    parcelas = valores.get('parcelas', 0)
+    valor_parcela = valores.get('valor_parcela', 0.0)
+    
+    valor_parcelado = f"R$ {total:.2f} em {parcelas}x de R$ {valor_parcela:.2f}"
+    
+    return {
+        "valor_a_vista": f"R$ {a_vista:.2f}",
+        "valor_parcelado": valor_parcelado,
+    }
+
 def segmentar(cnae, cidade, uf):
     cnae = str(cnae)
     cidade = (cidade or "").strip().lower()
@@ -156,7 +182,6 @@ def gerar_pdf(dados, signature_img_path=None):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Inserir logo no top-right se existir
     if logo_path:
         try:
             page_width = pdf.w
@@ -168,7 +193,6 @@ def gerar_pdf(dados, signature_img_path=None):
         except Exception as e:
             print("Erro ao inserir logo:", e)
 
-    # Cabeçalho / título
     pdf.set_font("helvetica", "B", 13)
     pdf.set_y(15)
     pdf.cell(0, 8, "Ficha de Inscrição - Associação SESCON-SP / AESCON-SP", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
@@ -183,7 +207,7 @@ def gerar_pdf(dados, signature_img_path=None):
     pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin, 7, f"Endereço: {dados.get('Endereço','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin, 7, f"E-mail: {dados.get('Contato Empresa','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.cell(0, 6, f"Telefone: {dados.get('Telefone Empresa','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(0, 6, f"Ramo de Atividade (CNAE): {dados.get('CNAE Fiscal','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.cell(0, 6, f"Serviços de Interesse: {dados.get('Serviços de Interesse','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(6)
 
     # DADOS DO SÓCIO
@@ -247,7 +271,6 @@ def gerar_pdf(dados, signature_img_path=None):
     pdf.cell(0,6, f"Data do Preenchimento: {now.strftime('%d/%m/%Y %H:%M')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(10)
 
-    # Inserir assinatura (se existir)
     if signature_img_path and os.path.exists(signature_img_path):
         try:
             pdf.image(signature_img_path, x=pdf.get_x()+20, y=pdf.get_y(), w=100, keep_aspect_ratio=True)
@@ -264,7 +287,6 @@ def gerar_pdf(dados, signature_img_path=None):
         pdf.cell(0,6, "Assinatura do Sócio da Empresa", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         pdf.ln(8)
 
-    # CNPJs no rodapé conforme plano
     pdf.set_font("helvetica", "I", 9)
     for cnpj_text in cnpjs_to_show:
         pdf.cell(0,5, f"CNPJ: {cnpj_text}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)

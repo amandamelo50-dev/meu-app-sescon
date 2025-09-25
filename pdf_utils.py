@@ -1,4 +1,3 @@
-# pdf_utils.py
 import os
 import requests
 from fpdf import FPDF
@@ -11,7 +10,6 @@ from PIL import Image
 CNPJ_SESCON = "62.638.168/0001-84"
 CNPJ_AESCON = "62.636.675/0001-89"
 
-# CNAEs e cidades (copiados do seu código original)
 cnaes_ouro = {"6920601", "6920602"}
 cnaes_prata = {
     "0230600", "5229002", "5229099", "5240101", "5250804", "5250805", "6461100", "6462000", "6463800",
@@ -40,7 +38,6 @@ links_planos = {
     "Prata Aescon": "https://www.canva.com/design/DAGqEt4Cmb8/wbIcg1Pg825iVmWQvRaurQ/view?utm_content=DAGqEt4Cmb8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h93a130898d"
 }
 
-# -------------------- TABELAS DE PREÇO (colei suas tabelas completas) --------------------
 prata_pricing = {
     1: {"total": 720.00, "parcelas": 12, "valor_parcela": 60.00, "a_vista": 660.00},
     2: {"total": 660.00, "parcelas": 11, "valor_parcela": 60.00, "a_vista": 607.00},
@@ -86,7 +83,6 @@ prata_aescon_pricing = {
     12: {"total": 35.00, "parcelas": 1, "valor_parcela": 35.00, "a_vista": 35.00},
 }
 
-# -------------------- FUNÇÕES AUXILIARES --------------------
 def consultar_cnpj(cnpj):
     cnpj = "".join(filter(str.isdigit, str(cnpj)))
     try:
@@ -97,7 +93,6 @@ def consultar_cnpj(cnpj):
         return None
 
 def get_plano_info(plano):
-    """Retorna os valores do plano sugerido para o mês atual."""
     mes_atual = datetime.now().month
     tabela = {}
     if plano == "Plano Prata":
@@ -148,10 +143,6 @@ def segmentar(cnae, cidade, uf):
     return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700"
 
 def get_logo_path_and_cnpj_footer(plano):
-    """
-    Determina o caminho do logo (na pasta static/) e os CNPJs do rodapé,
-    com base no plano. Retorna (logo_path_or_None, [lista_de_cnpjs])
-    """
     base = os.path.join(os.path.dirname(__file__), "static")
     logo_file_name = None
     cnpj_footer = []
@@ -169,12 +160,7 @@ def get_logo_path_and_cnpj_footer(plano):
     logo_path = os.path.join(base, logo_file_name)
     return (logo_path if os.path.exists(logo_path) else None), cnpj_footer
 
-# -------------------- GERAR PDF --------------------
 def gerar_pdf(dados, signature_img_path=None):
-    """
-    Gera o PDF a partir de 'dados' (dict) e opcionalmente da imagem de assinatura.
-    Retorna caminho do arquivo PDF (string) ou None em caso de erro.
-    """
     plano = dados.get("Plano", "")
     logo_path, cnpjs_to_show = get_logo_path_and_cnpj_footer(plano)
 
@@ -198,7 +184,6 @@ def gerar_pdf(dados, signature_img_path=None):
     pdf.cell(0, 8, "Ficha de Inscrição - Associação SESCON-SP / AESCON-SP", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
     pdf.ln(10)
 
-    # DADOS DA EMPRESA
     pdf.set_font("helvetica", "B", 11)
     pdf.cell(0, 7, "DADOS DA EMPRESA", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("helvetica", "", 10)
@@ -210,7 +195,6 @@ def gerar_pdf(dados, signature_img_path=None):
     pdf.cell(0, 6, f"Serviços de Interesse: {dados.get('Serviços de Interesse','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(6)
 
-    # DADOS DO SÓCIO
     pdf.set_font("helvetica", "B", 11)
     pdf.cell(0, 7, "DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("helvetica", "", 10)
@@ -218,7 +202,6 @@ def gerar_pdf(dados, signature_img_path=None):
     pdf.cell(0, 6, f"CPF do Sócio: {dados.get('CPF Socio PDF','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(6)
 
-    # PLANO SUGERIDO
     pdf.set_font("helvetica", "B", 11)
     pdf.cell(0, 7, "PLANO SUGERIDO", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("helvetica", "", 10)
@@ -231,35 +214,19 @@ def gerar_pdf(dados, signature_img_path=None):
         pdf.cell(0, 6, "Este plano inclui associação ao AESCON-SP.", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(6)
 
-    # FORMA DE PAGAMENTO
     pdf.set_font("helvetica", "B", 11)
     pdf.cell(0, 7, "FORMA DE PAGAMENTO SUGERIDA", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font("helvetica", "", 10)
-    forma_pg = (dados.get('Forma Pagamento','') or "").lower()
-    mes_atual = datetime.now().month
-    tabela = {}
-    if plano == "Plano Prata":
-        tabela = prata_pricing
-    elif plano == "Plano Ouro Premium":
-        tabela = ouro_premium_pricing
-    elif plano == "Prata Aescon":
-        tabela = prata_aescon_pricing
-    if tabela:
-        valores = tabela.get(mes_atual, {})
-        if forma_pg == "à vista" or forma_pg == "à vista":
-            valor_total = f"R$ {valores.get('a_vista', 0.0):.2f}"
-        else:
-            parcelas = valores.get('parcelas', 0)
-            valor_parcela = valores.get('valor_parcela', 0.0)
-            valor_total = f"R$ {valores.get('total', 0.0):.2f} em {parcelas}x de R$ {valor_parcela:.2f}"
-    else:
-        valor_total = "N/A"
+    
+    plano_info = get_plano_info(plano)
+    valor_a_vista = plano_info.get("valor_a_vista", "N/A")
+    valor_parcelado = plano_info.get("valor_parcelado", "N/A")
 
     pdf.cell(0, 6, f"Forma de Pagamento: {dados.get('Forma Pagamento','')}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(0, 6, f"Valor Total: {valor_total}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.cell(0, 6, f"Valor À Vista: {valor_a_vista}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.cell(0, 6, f"Valor Parcelado: {valor_parcelado}", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(6)
 
-    # Textos padrão
     pdf.set_font("helvetica", "", 9)
     pdf.multi_cell(0,5, "A anuidade informada refere-se ao valor proporcional aos meses restantes do ano corrente. No próximo ciclo de renovação, o valor será referente à anuidade integral.", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(4)

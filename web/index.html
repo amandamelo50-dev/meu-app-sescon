@@ -29,11 +29,30 @@
 
       <label>Serviços de Interesse</label>
       <div id="servicos-interesse-container">
-          <label><input type="checkbox" name="servicos_interesse" value="Assessoria Jurídica"> Assessoria Jurídica</label>
-          <label><input type="checkbox" name="servicos_interesse" value="Certificado Digital"> Certificado Digital</label>
-          <label><input type="checkbox" name="servicos_interesse" value="Cursos e Capacitação"> Cursos e Capacitação</label>
-          <label><input type="checkbox" name="servicos_interesse" value="Consultoria"> Consultoria</label>
-          <label><input type="checkbox" name="servicos_interesse" value="Parcerias e Convênios"> Parcerias e Convênios</label>
+          <label><input type="checkbox" name="servicos_interesse" value="149SERVICO DE INTERESSE - INSTITUCIONAL"> Institucional</label>
+          <label><input type="checkbox" name="servicos_interesse" value="150SERVICO DE INTERESSE - BOLSA DE TALENTOS"> Bolsa de Talentos</label>
+          <label><input type="checkbox" name="servicos_interesse" value="151SERVICO DE INTERESSE - CONVENCAO COLETIVA"> Convenção Coletiva</label>
+          <label><input type="checkbox" name="servicos_interesse" value="152SERVICO DE INTERESSE - CURSOS UNISESCON"> Cursos UNISESCON</label>
+          <label><input type="checkbox" name="servicos_interesse" value="153SERVICO DE INTERESSE - CONSULTORIAS JURIDICA - IOB TELEFONE"> Consultoria Jurídica - IOB Telefone</label>
+          <label><input type="checkbox" name="servicos_interesse" value="358SERVICO DE INTERESSE - CONSULTORIAS JURIDICA - IOB EXPLICA"> Consultoria Jurídica - IOB Explica</label>
+          <label><input type="checkbox" name="servicos_interesse" value="154SERVICO DE INTERESSE - ER JUCESP - FATURADO"> ER JUCESP - Faturado</label>
+          <label><input type="checkbox" name="servicos_interesse" value="155SERVICO DE INTERESSE - CERTIFICACAO DIGITAL"> Certificação Digital</label>
+          <label><input type="checkbox" name="servicos_interesse" value="156SERVICO DE INTERESSE - CONTABIL STORE"> Contábil Store</label>
+          <label><input type="checkbox" name="servicos_interesse" value="157SERVICO DE INTERESSE - PESQUISAS"> Pesquisas</label>
+          <label><input type="checkbox" name="servicos_interesse" value="158SERVICO DE INTERESSE - SOCIETARIO E LEGAL"> Societário e Legal</label>
+          <label><input type="checkbox" name="servicos_interesse" value="159SERVICO DE INTERESSE - PROJETO LGPD"> Projeto LGPD</label>
+          <label><input type="checkbox" name="servicos_interesse" value="160SERVICO DE INTERESSE - PQEC"> PQEC</label>
+          <label><input type="checkbox" name="servicos_interesse" value="161SERVICO DE INTERESSE - EVENTOS"> Eventos</label>
+          <label><input type="checkbox" name="servicos_interesse" value="165SERVICO DE INTERESSE - ENDERECO FISCAL"> Endereço Fiscal</label>
+          <label><input type="checkbox" name="servicos_interesse" value="166SERVICO DE INTERESSE - COWORKING"> Coworking</label>
+          <label><input type="checkbox" name="servicos_interesse" value="306SERVICO DE INTERESSE - LOCACAO DE AUDITORIO"> Locação de Auditório</label>
+          <label><input type="checkbox" name="servicos_interesse" value="315SERVICO DE INTERESSE - NAO INFORMADO AINDA"> Não Informado Ainda</label>
+          <label><input type="checkbox" name="servicos_interesse" value="317SERVICO DE INTERESSE - PARCERIAS"> Parcerias</label>
+          <label><input type="checkbox" name="servicos_interesse" value="342SERVICO DE INTERESSE - RECEITA FEDERAL"> Receita Federal</label>
+          <label><input type="checkbox" name="servicos_interesse" value="343SERVICO DE INTERESSE - CENTRAL DE SERVIÇOS"> Central de Serviços</label>
+          <label><input type="checkbox" name="servicos_interesse" value="344SERVICO DE INTERESSE - CCT"> CCT</label>
+          <label><input type="checkbox" name="servicos_interesse" value="347SERVIÇO DE INTERESSE - CERTIFICADO DIGITAL GRATUITO"> Certificado Digital Gratuito</label>
+          <label><input type="checkbox" name="servicos_interesse" value="348SERVICO DE INTERESSE - CONTRIBUIÇÃO REPRESENTATIVA"> Contribuição Representativa</label>
       </div>
 
       <label>Plano Sugerido</label>
@@ -70,78 +89,66 @@
   </div>
 
 <script>
-    // Listas de CNAEs Elegíveis (Ouro e Prata)
-    const cnaes_ouro = new Set(["6920601", "6920602"]);
-    const cnaes_prata = new Set([
-        "0230600", "5229002", "5229099", "5240101", "5250804", "5250805", "6461100", "6462000", "6463800",
-        "6611801", "6611802", "6611803", "6611804", "6612605", "6613400", "6619302", "6619303", "6619399",
-        "6621501", "6621502", "6629100", "6630400", "6911702", "6911703", "7020400", "7119701", "7119702",
-        "7119703", "7119704", "7120100", "7210000", "7220700", "7319004", "7319002", "7420002", "7420005",
-        "7490101", "7490103", "7490104", "7490105", "7490199", "8020000", "8211300", "8219999", "8550302",
-        "8599604", "8660700", "9411100", "9412000", "9430800", "9491000", "9499500", "8299799", "7320300"
-    ]);
+  window.jsPDF = window.jspdf.jsPDF;
 
-    // Listas de Cidades com Exclusão/Encaminhamento Regional
-    const cidades_tupa = new Set(["tupã", "arco-íris", "bastão", "herculândia", "ikanji", "marília", "pompéia", "queiroz"]);
-    const cidades_campinas = new Set(["campinas", "hortolândia", "sumaré", "valinhos", "vinhedo", "jaguariúna", "paulínia", "itatiba", "indaiatuba", "amparo", "pedreira", "socorro", "águas de lindóia", "monte alegre do sul", "serra negra", "holambra", "mogimirim", "mogiguaçu", "artur nogueira", "nova odessa", "santa bárbara d'oeste", "americana", "piracicaba", "limeira", "rio claro", "araras", "lemes"]);
-    const cidades_santos = new Set(["santos", "são vicente", "praia grande", "guarujá", "cubatão", "bertioga", "mongaguá", "itanhaém", "peruíbe", "cananéia", "ilhabela", "caraguatatuba", "ubatuba", "são sebastião"]);
+  // CNAE e Cidades
+  const cnaes_ouro = new Set(["6920601", "6920602"]);
+  const cnaes_prata = new Set([
+      "0230600", "5229002", "5229099", "5240101", "5250804", "5250805", "6461100", "6462000", "6463800",
+      "6611801", "6611802", "6611803", "6611804", "6612605", "6613400", "6619302", "6619303", "6619399",
+      "6621501", "6621502", "6629100", "6630400", "6911702", "6911703", "7020400", "7119701", "7119702",
+      "7119703", "7119704", "7120100", "7120100", "7210000", "7220700", "7319004", "7319002", "7420002", "7420005",
+      "7490101", "7490103", "7490104", "7490105", "7490199", "8020000", "8211300", "8219999", "8550302",
+      "8599604", "8660700", "9411100", "9412000", "9430800", "9491000", "9499500" ,"8299799","7320300"
+  ]);
 
-    /**
-     * Segmenta a empresa com base no CNAE e na localização.
-     * @param {string} cnae - O código CNAE da empresa.
-     * @param {string} cidade - O nome da cidade (para exceções regionais).
-     * @param {string} uf - A UF do estado.
-     * @returns {string} O plano de associação ou a mensagem de contato.
-     */
-    function segmentar(cnae, cidade, uf) {
-        // Regra 0: Fora do Estado de SP
-        if (uf.toUpperCase() !== "SP") {
-            return "Fora de SP – Não podemos associar.";
-        }
-        cidade = cidade.toLowerCase();
+  const cidades_tupa = new Set(["tupã", "arco-íris", "bastão", "herculândia", "ikanji", "marília", "pompéia", "queiroz"]);
+  const cidades_campinas = new Set(["campinas", "hortolândia", "sumaré", "valinhos", "vinhedo", "jaguariúna", "paulínia", "itatiba", "indaiatuba", "amparo", "pedreira", "socorro", "águas de lindóia", "monte alegre do sul", "serra negra", "holambra", "mogimirim", "mogiguaçu", "artur nogueira", "nova odessa", "santa bárbara d'oeste", "americana", "piracicaba", "limeira", "rio claro", "araras", "lemes"]);
+  const cidades_santos = new Set(["santos", "são vicente", "praia grande", "guarujá", "cubatão", "bertioga", "mongaguá", "itanhaém", "peruíbe", "cananéia", "ilhabela", "caraguatatuba", "ubatuba", "são sebastião"]);
 
-        // 1. VERIFICAÇÃO PRINCIPAL DE CNAE (Ouro, Prata ou Fora de Escopo)
-        let planoBase = null;
-        if (cnaes_ouro.has(cnae)) {
-            planoBase = "Plano Ouro Premium";
-        } else if (cnaes_prata.has(cnae)) {
-            planoBase = "Plano Prata";
-        } else {
-            // Se o CNAE não estiver em NENHUMA lista, ele é fora de escopo.
-            return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700";
-        }
 
-        // 2. EXCEÇÃO: CNAE Ouro em cidades regionais vira Prata Aescon
-        if (planoBase === "Plano Ouro Premium" && (cidades_tupa.has(cidade) || cidades_campinas.has(cidade) || cidades_santos.has(cidade))) {
-            return "Prata Aescon";
-        }
-        
-        // 3. EXCLUSÃO REGIONAL: Se a empresa é elegível (Ouro/Prata), mas está em uma cidade com convênio local, retorna o contato.
-        if (cidades_tupa.has(cidade)) {
-            return "Fora da região (Tupã). E-mail: sescontupan@unisite.com.br";
-        }
-        if (cidades_campinas.has(cidade)) {
-            return "Fora da região (Campinas). E-mail: sesconcampinas@sesconcampinas.org.br";
-        }
-        if (cidades_santos.has(cidade)) {
-            return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
-        }
+  // Preços
+  const prata_pricing = { 1: { total: 720.00, parcelas: 12, valor_parcela: 60.00, a_vista: 660.00 }, 2: { total: 660.00, parcelas: 11, valor_parcela: 60.00, a_vista: 607.00 }, 3: { total: 600.00, parcelas: 10, valor_parcela: 60.00, a_vista: 552.00 }, 4: { total: 540.00, parcelas: 9, valor_parcela: 60.00, a_vista: 497.00 }, 5: { total: 480.00, parcelas: 8, valor_parcela: 60.00, a_vista: 442.00 }, 6: { total: 420.00, parcelas: 7, valor_parcela: 60.00, a_vista: 386.00 }, 7: { total: 360.00, parcelas: 6, valor_parcela: 60.00, a_vista: 331.00 }, 8: { total: 300.00, parcelas: 5, valor_parcela: 60.00, a_vista: 276.00 }, 9: { total: 240.00, parcelas: 4, valor_parcela: 60.00, a_vista: 221.00 }, 10: { total: 180.00, parcelas: 3, valor_parcela: 60.00, a_vista: 166.00 }, 11: { total: 120.00, parcelas: 2, valor_parcela: 60.00, a_vista: 110.00 }, 12: { total: 60.00, parcelas: 1, valor_parcela: 60.00, a_vista: 60.00 } };
+  const ouro_premium_pricing = { 1: { total: 1140.00, parcelas: 12, valor_parcela: 95.00, a_vista: 1046.00 }, 2: { total: 1045.00, parcelas: 11, valor_parcela: 95.00, a_vista: 961.00 }, 3: { total: 950.00, parcelas: 10, valor_parcela: 95.00, a_vista: 874.00 }, 4: { total: 855.00, parcelas: 9, valor_parcela: 95.00, a_vista: 787.00 }, 5: { total: 760.00, parcelas: 8, valor_parcela: 95.00, a_vista: 700.00 }, 6: { total: 665.00, parcelas: 7, valor_parcela: 95.00, a_vista: 611.00 }, 7: { total: 570.00, parcelas: 6, valor_parcela: 95.00, a_vista: 524.00 }, 8: { total: 475.00, parcelas: 5, valor_parcela: 95.00, a_vista: 437.00 }, 9: { total: 380.00, parcelas: 4, valor_parcela: 95.00, a_vista: 350.00 }, 10: { total: 285.00, parcelas: 3, valor_parcela: 95.00, a_vista: 263.00 }, 11: { total: 190.00, parcelas: 2, valor_parcela: 95.00, a_vista: 175.00 }, 12: { total: 95.00, parcelas: 1, valor_parcela: 95.00, a_vista: 95.00 } };
+  const prata_aescon_pricing = { 1: { total: 420.00, parcelas: 12, valor_parcela: 35.00, a_vista: 386.00 }, 2: { total: 385.00, parcelas: 11, valor_parcela: 35.00, a_vista: 354.00 }, 3: { total: 350.00, parcelas: 10, valor_parcela: 35.00, a_vista: 322.00 }, 4: { total: 315.00, parcelas: 9, valor_parcela: 35.00, a_vista: 290.00 }, 5: { total: 280.00, parcelas: 8, valor_parcela: 35.00, a_vista: 258.00 }, 6: { total: 245.00, parcelas: 7, valor_parcela: 35.00, a_vista: 225.00 }, 7: { total: 210.00, parcelas: 6, valor_parcela: 35.00, a_vista: 193.00 }, 8: { total: 175.00, parcelas: 5, valor_parcela: 35.00, a_vista: 161.00 }, 9: { total: 140.00, parcelas: 4, valor_parcela: 35.00, a_vista: 129.00 }, 10: { total: 105.00, parcelas: 3, valor_parcela: 35.00, a_vista: 97.00 }, 11: { total: 70.00, parcelas: 2, valor_parcela: 35.00, a_vista: 65.00 }, 12: { total: 35.00, parcelas: 1, valor_parcela: 35.00, a_vista: 35.00 } };
 
-        // 4. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
-        return planoBase;
-    }
+  // Funções
+  function segmentar(cnae, cidade, uf) {
+      // Regra 0: Fora do Estado de SP
+      if (uf.toUpperCase() !== "SP") {
+          return "Fora de SP – Não podemos associar.";
+      }
+      cidade = cidade.toLowerCase();
 
-    // O restante do seu código de manipulação de DOM (ex: consultaCNPJ) continua aqui.
-    // ...
-    // ...
-</script>
+      // 1. VERIFICAÇÃO PRINCIPAL DE CNAE (Ouro, Prata ou Fora de Escopo)
+      let planoBase = null;
       if (cnaes_ouro.has(cnae)) {
-          return "Plano Ouro Premium";
+          planoBase = "Plano Ouro Premium";
+      } else if (cnaes_prata.has(cnae)) {
+          planoBase = "Plano Prata";
+      } else {
+          // Se o CNAE não estiver em NENHUMA lista, ele é fora de escopo.
+          return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700";
       }
-      if (cnaes_prata.has(cnae)) {
-          return "Plano Prata";
+
+      // 2. EXCEÇÃO: CNAE Ouro em cidades regionais vira Prata Aescon
+      if (planoBase === "Plano Ouro Premium" && (cidades_tupa.has(cidade) || cidades_campinas.has(cidade) || cidades_santos.has(cidade))) {
+          return "Prata Aescon";
       }
-      return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700";
+      
+      // 3. EXCLUSÃO REGIONAL: Se a empresa é elegível (Ouro/Prata), mas está em uma cidade com convênio local, retorna o contato.
+      if (cidades_tupa.has(cidade)) {
+          return "Fora da região (Tupã). E-mail: sescontupan@unisite.com.br";
+      }
+      if (cidades_campinas.has(cidade)) {
+          return "Fora da região (Campinas). E-mail: sesconcampinas@sesconcampinas.org.br";
+      }
+      if (cidades_santos.has(cidade)) {
+          return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
+      }
+
+      // 4. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
+      return planoBase;
   }
 
   function getPlanoInfo(plano) {
@@ -160,11 +167,11 @@
     const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
     const parcelas = valores.parcelas;
     const valorParcela = valores.valor_parcela ? `R$ ${valores.valor_parcela.toFixed(2).replace('.', ',')}` : "N/A";
-    const valorParcelado = parcelas && valorParcela ? `em ${parcelas}x de ${valorParcela}` : "N/A";
+    const valorParcelado = parcelas && valorParcela ? `R$ ${valores.total.toFixed(2).replace('.', ',')} em ${parcelas}x de ${valorParcela}` : "N/A";
 
     return {
         valor_a_vista: aVista,
-        valor_parcelado: `R$ ${valores.total.toFixed(2).replace('.', ',')} ${valorParcelado}`,
+        valor_parcelado: valorParcelado,
     };
   }
 

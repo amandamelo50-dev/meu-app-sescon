@@ -29,9 +29,9 @@ cidades_tupa = {"adamantina","bastos","dracena","flora rica","florida paulista",
 
 cidades_campinas = {"americana","arthur nogueira","cosmopolis","engenheiro coelho","holambra","indaiatuba",
 "itatiba","jaguariuna","monte mor","nova odessa","paulinia","santo antonio de posse","sumare",
-"valinhos","vinhedo","campinas"}
+"valinhos","vinhedro","campinas"}
 
-cidades_santos = {"mongagua","sao vicente","bertioga","praia grande","itariri","guaruja","itanhaem","cubatao",
+cidades_santos = {"mongagua","sao vicente","bertioga","praia grande","itariri","guaruja","itanhaem","cubata",
 "peruibe","santos"}
 
 links_planos = {
@@ -222,7 +222,7 @@ def gerar_pdf(dados, signature_img_path=None):
         tabela = prata_aescon_pricing
     if tabela:
         valores = tabela.get(mes_atual, {})
-        if forma_pg == "à vista" or forma_pg == "a vista":
+        if forma_pg == "à vista" or forma_pg == "à vista":
             valor_total = f"R$ {valores.get('a_vista', 0.0):.2f}"
         else:
             parcelas = valores.get('parcelas', 0)

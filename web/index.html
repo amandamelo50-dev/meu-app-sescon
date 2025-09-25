@@ -12,10 +12,13 @@
 
     <form id="fichaForm">
       <label>CNPJ</label>
-      <input type="text" name="cnpj" placeholder="Somente números">
+      <input type="text" name="cnpj" placeholder="Somente números" maxlength="14">
 
       <label>Razão Social</label>
-      <input type="text" name="razao" required>
+      <input type="text" name="razao" required disabled>
+
+      <label>Endereço</label>
+      <input type="text" name="endereco" disabled>
 
       <label>E-mail</label>
       <input type="email" name="email" placeholder="contato@empresa.com">
@@ -23,28 +26,23 @@
       <label>Telefone</label>
       <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX">
 
-      <label>Endereço</label>
-      <input type="text" name="endereco">
-      
-      <label>CNAE Fiscal</label>
-      <input type="text" name="cnae" placeholder="Ex: 6920601">
-      
-      <label>Cidade</label>
-      <input type="text" name="cidade" placeholder="Ex: São Paulo">
+      <label>Serviços de Interesse</label>
+      <div id="servicos-interesse-container">
+          <label><input type="checkbox" name="servicos_interesse" value="Assessoria Jurídica"> Assessoria Jurídica</label>
+          <label><input type="checkbox" name="servicos_interesse" value="Certificado Digital"> Certificado Digital</label>
+          <label><input type="checkbox" name="servicos_interesse" value="Cursos e Capacitação"> Cursos e Capacitação</label>
+          <label><input type="checkbox" name="servicos_interesse" value="Consultoria"> Consultoria</label>
+          <label><input type="checkbox" name="servicos_interesse" value="Parcerias e Convênios"> Parcerias e Convênios</label>
+      </div>
 
-      <label>UF</label>
-      <input type="text" name="uf" placeholder="Ex: SP">
+      <label>Plano Sugerido</label>
+      <input type="text" name="plano" disabled>
+      <p id="plano-info"></p>
 
-      <label>Plano</label>
-      <select name="plano" disabled>
-        <option value="">A ser definido pela validação</option>
-        <option value="Plano Prata">Plano Prata</option>
-        <option value="Plano Ouro Premium">Plano Ouro Premium</option>
-        <option value="Prata Aescon">Prata Aescon</option>
+      <label>Sócio/Responsável</label>
+      <select id="socios-select" name="nome_socio" required>
+        <option value="">Selecione o sócio responsável</option>
       </select>
-
-      <label>Nome do Sócio</label>
-      <input type="text" name="nome_socio">
 
       <label>CPF do Sócio</label>
       <input type="text" name="cpf_socio">
@@ -63,7 +61,7 @@
         <button type="button" id="clearBtn">Limpar Assinatura</button>
       </div>
 
-      <button type="submit" id="sendBtn">Gerar PDF</button>
+      <button type="submit" id="sendBtn" disabled>Gerar PDF</button>
     </form>
 
     <div id="result" style="margin-top:20px;"></div>
@@ -71,6 +69,16 @@
   </div>
 
 <script>
+  const cnpjInput = document.querySelector('input[name="cnpj"]');
+  const razaoInput = document.querySelector('input[name="razao"]');
+  const enderecoInput = document.querySelector('input[name="endereco"]');
+  const planoInput = document.querySelector('input[name="plano"]');
+  const planoInfo = document.getElementById("plano-info");
+  const sociosSelect = document.getElementById("socios-select");
+  const sendBtn = document.getElementById("sendBtn");
+  const resultDiv = document.getElementById("result");
+  const form = document.getElementById("fichaForm");
+
   // Simple signature pad (mouse & touch)
   const canvas = document.getElementById("signature-pad");
   const ctx = canvas.getContext("2d");
@@ -87,7 +95,6 @@
     ctx.stroke();
     ctx.closePath();
   }
-
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const rect = canvas.getBoundingClientRect();
@@ -105,7 +112,6 @@
   });
   canvas.addEventListener("mouseup", () => drawing = false);
   canvas.addEventListener("mouseout", () => drawing = false);
-
   canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
     drawing = true;
@@ -113,9 +119,7 @@
     const t = e.touches[0];
     lastX = t.clientX - rect.left;
     lastY = t.clientY - rect.top;
-  }, {
-    passive: false
-  });
+  }, { passive: false });
   canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
     if (!drawing) return;
@@ -126,58 +130,85 @@
     drawLine(lastX, lastY, x, y);
     lastX = x;
     lastY = y;
-  }, {
-    passive: false
-  });
+  }, { passive: false });
   canvas.addEventListener("touchend", () => drawing = false);
 
   document.getElementById("clearBtn").addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  document.getElementById("fichaForm").addEventListener("submit", async (ev) => {
+  // Função para buscar dados do CNPJ
+  cnpjInput.addEventListener('input', async () => {
+    const cnpj = cnpjInput.value.replace(/\D/g, '');
+    if (cnpj.length === 14) {
+      resultDiv.textContent = 'Buscando dados do CNPJ...';
+      try {
+        const response = await fetch(`http://localhost:8000/consultar-cnpj/${cnpj}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          razaoInput.value = data.razao_social || '';
+          enderecoInput.value = data.endereco || '';
+          planoInput.value = data.plano_sugerido || '';
+          
+          if (data.plano_sugerido && (data.plano_sugerido.includes('Fora') || data.plano_sugerido.includes('CNAE fora'))) {
+            planoInfo.innerHTML = `<span style="color:red;font-weight:bold;">${data.plano_sugerido}</span>`;
+            sendBtn.disabled = true;
+          } else {
+            planoInfo.textContent = `À vista: ${data.valor_a_vista}. Parcelado: ${data.valor_parcelado}.`;
+            sendBtn.disabled = false;
+          }
+
+          // Preenche a lista de sócios
+          sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
+          if (data.socios && data.socios.length > 0) {
+            data.socios.forEach(socio => {
+              const option = document.createElement('option');
+              option.value = socio.nome;
+              option.textContent = socio.nome;
+              sociosSelect.appendChild(option);
+            });
+          }
+          resultDiv.textContent = 'Dados carregados com sucesso.';
+        } else {
+          resultDiv.textContent = `❌ Erro: ${data.detail || 'CNPJ não encontrado'}`;
+          sendBtn.disabled = true;
+          razaoInput.value = '';
+          enderecoInput.value = '';
+          planoInput.value = '';
+          planoInfo.textContent = '';
+          sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
+        }
+      } catch (error) {
+        resultDiv.textContent = `❌ Erro na requisição: ${error.message}`;
+        sendBtn.disabled = true;
+      }
+    } else {
+        resultDiv.textContent = 'Digite 14 dígitos do CNPJ.';
+        sendBtn.disabled = true;
+    }
+  });
+
+  form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    const form = ev.target;
+    resultDiv.textContent = 'Gerando PDF...';
+
     const formData = new FormData(form);
     const json = {};
     formData.forEach((v, k) => {
-      if (k === "termo_aceite") json[k] = true;
-      else json[k] = v;
+      if (k === "servicos_interesse") {
+        if (!json[k]) json[k] = [];
+        json[k].push(v);
+      } else {
+        json[k] = v;
+      }
     });
 
-    // 1. PRIMEIRO PASSO: Validar os dados antes de gerar o PDF
-    document.getElementById("result").textContent = "Validando dados...";
-    const validarResp = await fetch("http://localhost:8000/validar-dados", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(json)
-    });
-
-    if (!validarResp.ok) {
-      const errorText = await validarResp.text();
-      document.getElementById("result").textContent = "❌ Erro na validação: " + errorText;
-      return;
-    }
-
-    const validacaoData = await validarResp.json();
-    
-    // Se o backend disser que não está qualificado, mostra a mensagem
-    if (validacaoData.status === "nao_qualificado") {
-        document.getElementById("result").textContent = "❌ Não qualificado: " + validacaoData.mensagem;
-        return;
-    }
-    
-    // Se estiver qualificado, continua para a geração do PDF
-    const planoSugerido = validacaoData.plano;
-    json.plano = planoSugerido;
-    
-    document.getElementById("result").textContent = `✅ Dados validados. Plano sugerido: ${planoSugerido}. Gerando PDF...`;
-
-    // 2. SEGUNDO PASSO: Gerar o PDF (somente se a validação passou)
     const dataURL = canvas.toDataURL("image/png");
     json.signature = dataURL;
+
+    // Use o plano já obtido pela consulta
+    json.plano = planoInput.value;
 
     const resp = await fetch("http://localhost:8000/gerar-pdf", {
       method: "POST",
@@ -195,10 +226,10 @@
       link.download = "ficha_associacao.pdf";
       link.style.display = "inline-block";
       link.textContent = "📥 Baixar PDF gerado";
-      document.getElementById("result").textContent = "✅ PDF gerado com sucesso.";
+      resultDiv.textContent = "✅ PDF gerado com sucesso.";
     } else {
       const txt = await resp.text();
-      document.getElementById("result").textContent = "❌ Erro ao gerar PDF: " + txt;
+      resultDiv.textContent = "❌ Erro ao gerar PDF: " + txt;
     }
   });
 </script>

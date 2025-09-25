@@ -57,7 +57,6 @@ async def gerar_pdf_endpoint(request: Request):
     except Exception as e:
         return JSONResponse({"erro": "JSON inválido ou content-type inválido"}, status_code=400)
 
-    # Verifica se o plano sugerido é válido antes de prosseguir
     plano_sugerido = data.get("plano", "")
     if "Fora" in plano_sugerido or "CNAE fora" in plano_sugerido:
         return JSONResponse({"erro": "Empresa não qualificada para a associação."}, status_code=400)

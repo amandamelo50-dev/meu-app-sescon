@@ -125,9 +125,12 @@
 
   // Funções
   function segmentar(cnae, cidade, uf) {
-      // *** DEBUG: Mostra o que está sendo processado ***
-      console.log(`[DEBUG] CNAE Recebido: ${cnae}`);
-      console.log(`[DEBUG] Cidade Recebida Sanitizada: ${cidade}`);
+      // *** CORREÇÃO: Aplica TRIM para remover espaços invisíveis que a API pode ter adicionado ***
+      const cnae_limpo = cnae.trim();
+      const cidade_limpa = cidade.trim();
+
+      console.log(`[DEBUG] CNAE Recebido: ${cnae_limpo}`);
+      console.log(`[DEBUG] Cidade Recebida Sanitizada: ${cidade_limpa}`);
 
       // Regra 0: Fora do Estado de SP
       if (uf.toUpperCase() !== "SP") {
@@ -136,9 +139,9 @@
       
       // 1. VERIFICAÇÃO PRINCIPAL DE CNAE (Ouro, Prata ou Fora de Escopo)
       let planoBase = null;
-      if (cnaes_ouro.has(cnae)) {
+      if (cnaes_ouro.has(cnae_limpo)) { // Usa cnae_limpo
           planoBase = "Plano Ouro Premium";
-      } else if (cnaes_prata.has(cnae)) {
+      } else if (cnaes_prata.has(cnae_limpo)) { // Usa cnae_limpo
           planoBase = "Plano Prata";
       } else {
           // Se o CNAE não estiver em NENHUMA lista, ele é fora de escopo.
@@ -146,30 +149,24 @@
       }
 
       // 2. EXCEÇÃO: CNAE Ouro em cidades regionais vira Prata Aescon
-      if (planoBase === "Plano Ouro Premium" && (cidades_tupa.has(cidade) || cidades_campinas.has(cidade) || cidades_santos.has(cidade))) {
+      if (planoBase === "Plano Ouro Premium" && (cidades_tupa.has(cidade_limpa) || cidades_campinas.has(cidade_limpa) || cidades_santos.has(cidade_limpa))) {
           return "Prata Aescon";
       }
       
       // 3. EXCLUSÃO REGIONAL: Se a empresa é elegível (Ouro/Prata), mas está em uma cidade com convênio local, retorna o contato.
-      if (cidades_tupa.has(cidade)) {
+      if (cidades_tupa.has(cidade_limpa)) {
           return "Fora da região (Tupã). E-mail: sescontupan@unisite.com.br";
       }
-      if (cidades_campinas.has(cidade)) {
+      if (cidades_campinas.has(cidade_limpa)) {
           return "Fora da região (Campinas). E-mail: sesconcampinas@sesconcampinas.org.br";
       }
-      if (cidades_santos.has(cidade)) {
+      if (cidades_santos.has(cidade_limpa)) {
           return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
       }
       
-      // 4. Se a cidade for SAO PAULO (sanitizada fica 'sao paulo'), ela passa direto aqui.
-      if (cidade === "sao paulo") {
-        // CNAE 6920601 é Ouro Premium e a cidade é a Capital, que não tem restrição
-        if (planoBase === "Plano Ouro Premium") {
-            return "Plano Ouro Premium";
-        }
-        return planoBase;
-      }
-
+      // 4. Se a cidade é a Capital, que não tem restrição, retorna o plano base.
+      // A capital é tratada como todas as outras cidades elegíveis que não estão nas listas de exclusão.
+      
       // 5. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
       return planoBase;
   }
@@ -209,7 +206,7 @@
   const resultDiv = document.getElementById("result");
   const form = document.getElementById("fichaForm");
 
-  // Assinatura
+  // Assinatura (Mantida)
   const canvas = document.getElementById("signature-pad");
   const ctx = canvas.getContext("2d");
   let drawing = false;
@@ -271,7 +268,7 @@
     const cnpj = cnpjInput.value.replace(/\D/g, '');
     if (cnpj.length === 14) {
       resultDiv.textContent = 'Buscando dados do CNPJ...';
-      sendBtn.disabled = true; // Desabilita o botão ao iniciar a busca
+      sendBtn.disabled = true; 
       
       // Limpar campos de plano e info para nova busca
       planoInput.value = '';
@@ -330,12 +327,11 @@
     }
   });
 
-  // Geração do PDF
+  // Geração do PDF (Mantida)
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     resultDiv.textContent = 'Gerando PDF...';
 
-    // Verificação adicional para garantir que o botão só funciona se o plano for válido e campos preenchidos
     if (sendBtn.disabled) {
         resultDiv.textContent = 'Preencha todos os campos obrigatórios e verifique a elegibilidade do CNPJ.';
         return;

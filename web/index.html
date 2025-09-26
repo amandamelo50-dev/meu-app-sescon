@@ -117,14 +117,14 @@
   function segmentar(cnae, cidade, uf) {
       // *** DEBUG: Mostra o que está sendo processado ***
       console.log(`[DEBUG] CNAE Recebido: ${cnae}`);
-      console.log(`[DEBUG] Cidade Recebida: ${cidade}`);
+      console.log(`[DEBUG] Cidade Recebida: ${cidade}`); // Agora deve ser minúscula
 
       // Regra 0: Fora do Estado de SP
       if (uf.toUpperCase() !== "SP") {
           return "Fora de SP – Não podemos associar.";
       }
-      cidade = cidade.toLowerCase();
-
+      // Não precisa mais converter aqui, pois já foi convertida no evento de CNPJ
+      
       // 1. VERIFICAÇÃO PRINCIPAL DE CNAE (Ouro, Prata ou Fora de Escopo)
       let planoBase = null;
       if (cnaes_ouro.has(cnae)) {
@@ -264,7 +264,10 @@
           razaoInput.value = data.razao_social || '';
           enderecoInput.value = `${data.logradouro || ''}, ${data.numero || ''}, ${data.bairro || ''} - ${data.municipio || ''}/${data.uf || ''}`;
           
-          const planoSugerido = segmentar(data.cnae_fiscal, data.municipio, data.uf);
+          // CORREÇÃO ESSENCIAL: Converte o município para minúsculo ANTES de enviar para a função segmentar
+          const municipioMinusculo = (data.municipio || '').toLowerCase();
+          
+          const planoSugerido = segmentar(data.cnae_fiscal, municipioMinusculo, data.uf);
           planoInput.value = planoSugerido || '';
           
           if (planoSugerido && (planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora'))) {
@@ -274,6 +277,7 @@
           } else {
             const planoInfoData = getPlanoInfo(planoSugerido);
             planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
+            // Se o plano é válido, reabilita o botão
             sendBtn.disabled = false;
           }
 
@@ -323,6 +327,7 @@
         }
     }
 
+    // Se a geração do PDF for feita no frontend (como neste código)
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     let y = 20;

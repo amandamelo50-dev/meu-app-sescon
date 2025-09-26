@@ -22,10 +22,10 @@
       <input type="text" name="endereco" disabled>
 
       <label>E-mail</label>
-      <input type="email" name="email" placeholder="contato@empresa.com">
+      <input type="email" name="email" placeholder="contato@empresa.com" required>
 
       <label>Telefone</label>
-      <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX">
+      <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX" required>
 
       <label>Serviços de Interesse</label>
       <div id="servicos-interesse-container">
@@ -73,7 +73,7 @@
         <option value="À vista">À vista</option>
       </select>
 
-      <label><input type="checkbox" name="termo_aceite" value="1"> Declaro estar ciente e de acordo com os termos de associação.</label>
+      <label><input type="checkbox" name="termo_aceite" value="1" required> Declaro estar ciente e de acordo com os termos de associação.</label>
 
       <h3>Assinatura (use mouse ou touch)</h3>
       <canvas id="signature-pad" width=600 height=200 style="border:1px solid #ccc;"></canvas>
@@ -118,7 +118,10 @@
   const cidades_campinas = new Set(["campinas", "hortolandia", "sumare", "valinhos", "vinhedo", "jaguariuna", "paulinia", "itatiba", "indaiatuba", "amparo", "pedreira", "socorro", "aguas de lindoia", "monte alegre do sul", "serra negra", "holambra", "mogimirim", "mogiguacu", "artur nogueira", "nova odessa", "santa barbara doeste", "americana", "piracicaba", "limeira", "rio claro", "araras", "lemes"]);
   const cidades_santos = new Set(["santos", "sao vicente", "praia grande", "guaruja", "cubatao", "bertioga", "mongagua", "itanhaem", "peruibe", "cananeia", "ilhabela", "caraguatatuba", "ubatuba", "sao sebastiao"]);
 
-  // Preços (tabelas de valores) - (Omitidos por brevidade, permanecem iguais ao último código)
+  // Preços (tabelas de valores)
+  const prata_pricing = { 1: { total: 720.00, parcelas: 12, valor_parcela: 60.00, a_vista: 660.00 }, 2: { total: 660.00, parcelas: 11, valor_parcela: 60.00, a_vista: 607.00 }, 3: { total: 600.00, parcelas: 10, valor_parcela: 60.00, a_vista: 552.00 }, 4: { total: 540.00, parcelas: 9, valor_parcela: 60.00, a_vista: 497.00 }, 5: { total: 480.00, parcelas: 8, valor_parcela: 60.00, a_vista: 442.00 }, 6: { total: 420.00, parcelas: 7, valor_parcela: 60.00, a_vista: 386.00 }, 7: { total: 360.00, parcelas: 6, valor_parcela: 60.00, a_vista: 331.00 }, 8: { total: 300.00, parcelas: 5, valor_parcela: 60.00, a_vista: 276.00 }, 9: { total: 240.00, parcelas: 4, valor_parcela: 60.00, a_vista: 221.00 }, 10: { total: 180.00, parcelas: 3, valor_parcela: 60.00, a_vista: 166.00 }, 11: { total: 120.00, parcelas: 2, valor_parcela: 60.00, a_vista: 110.00 }, 12: { total: 60.00, parcelas: 1, valor_parcela: 60.00, a_vista: 60.00 } };
+  const ouro_premium_pricing = { 1: { total: 1140.00, parcelas: 12, valor_parcela: 95.00, a_vista: 1046.00 }, 2: { total: 1045.00, parcelas: 11, valor_parcela: 95.00, a_vista: 961.00 }, 3: { total: 950.00, parcelas: 10, valor_parcela: 95.00, a_vista: 874.00 }, 4: { total: 855.00, parcelas: 9, valor_parcela: 95.00, a_vista: 787.00 }, 5: { total: 760.00, parcelas: 8, valor_parcela: 95.00, a_vista: 700.00 }, 6: { total: 665.00, parcelas: 7, valor_parcela: 95.00, a_vista: 611.00 }, 7: { total: 570.00, parcelas: 6, valor_parcela: 95.00, a_vista: 524.00 }, 8: { total: 475.00, parcelas: 5, valor_parcela: 95.00, a_vista: 437.00 }, 9: { total: 380.00, parcelas: 4, valor_parcela: 95.00, a_vista: 350.00 }, 10: { total: 285.00, parcelas: 3, valor_parcela: 95.00, a_vista: 263.00 }, 11: { total: 190.00, parcelas: 2, valor_parcela: 95.00, a_vista: 175.00 }, 12: { total: 95.00, parcelas: 1, valor_parcela: 95.00, a_vista: 95.00 } };
+  const prata_aescon_pricing = { 1: { total: 420.00, parcelas: 12, valor_parcela: 35.00, a_vista: 386.00 }, 2: { total: 385.00, parcelas: 11, valor_parcela: 35.00, a_vista: 354.00 }, 3: { total: 350.00, parcelas: 10, valor_parcela: 35.00, a_vista: 322.00 }, 4: { total: 315.00, parcelas: 9, valor_parcela: 35.00, a_vista: 290.00 }, 5: { total: 280.00, parcelas: 8, valor_parcela: 35.00, a_vista: 258.00 }, 6: { total: 245.00, parcelas: 7, valor_parcela: 35.00, a_vista: 225.00 }, 7: { total: 210.00, parcelas: 6, valor_parcela: 35.00, a_vista: 193.00 }, 8: { total: 175.00, parcelas: 5, valor_parcela: 35.00, a_vista: 161.00 }, 9: { total: 140.00, parcelas: 4, valor_parcela: 35.00, a_vista: 129.00 }, 10: { total: 105.00, parcelas: 3, valor_parcela: 35.00, a_vista: 97.00 }, 11: { total: 70.00, parcelas: 2, valor_parcela: 35.00, a_vista: 65.00 }, 12: { total: 35.00, parcelas: 1, valor_parcela: 35.00, a_vista: 35.00 } };
 
   // Funções
   function segmentar(cnae, cidade, uf) {
@@ -161,11 +164,32 @@
       // 4. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
       return planoBase;
   }
-  
-  // (Função getPlanoInfo mantida, por brevidade)
-  function getPlanoInfo(plano) { /* ... */ }
 
-  // Elementos do DOM (Mantidos, por brevidade)
+  function getPlanoInfo(plano) {
+    const mesAtual = new Date().getMonth() + 1;
+    let tabela = {};
+    if (plano === "Plano Prata") {
+        tabela = prata_pricing;
+    } else if (plano === "Plano Ouro Premium") {
+        tabela = ouro_premium_pricing;
+    } else if (plano === "Prata Aescon") {
+        tabela = prata_aescon_pricing;
+    } else {
+        return { valor_a_vista: "N/A", valor_parcelado: "N/A" };
+    }
+    const valores = tabela[mesAtual] || {};
+    const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
+    const parcelas = valores.parcelas;
+    const valorParcela = valores.valor_parcela ? `R$ ${valores.valor_parcela.toFixed(2).replace('.', ',')}` : "N/A";
+    const valorParcelado = parcelas && valorParcela ? `R$ ${valores.total.toFixed(2).replace('.', ',')} em ${parcelas}x de ${valorParcela}` : "N/A";
+
+    return {
+        valor_a_vista: aVista,
+        valor_parcelado: valorParcelado,
+    };
+  }
+
+  // Elementos do DOM
   const cnpjInput = document.querySelector('input[name="cnpj"]');
   const razaoInput = document.querySelector('input[name="razao"]');
   const enderecoInput = document.querySelector('input[name="endereco"]');
@@ -175,33 +199,76 @@
   const sendBtn = document.getElementById("sendBtn");
   const resultDiv = document.getElementById("result");
   const form = document.getElementById("fichaForm");
-  const prata_pricing = { 1: { total: 720.00, parcelas: 12, valor_parcela: 60.00, a_vista: 660.00 }, 2: { total: 660.00, parcelas: 11, valor_parcela: 60.00, a_vista: 607.00 }, 3: { total: 600.00, parcelas: 10, valor_parcela: 60.00, a_vista: 552.00 }, 4: { total: 540.00, parcelas: 9, valor_parcela: 60.00, a_vista: 497.00 }, 5: { total: 480.00, parcelas: 8, valor_parcela: 60.00, a_vista: 442.00 }, 6: { total: 420.00, parcelas: 7, valor_parcela: 60.00, a_vista: 386.00 }, 7: { total: 360.00, parcelas: 6, valor_parcela: 60.00, a_vista: 331.00 }, 8: { total: 300.00, parcelas: 5, valor_parcela: 60.00, a_vista: 276.00 }, 9: { total: 240.00, parcelas: 4, valor_parcela: 60.00, a_vista: 221.00 }, 10: { total: 180.00, parcelas: 3, valor_parcela: 60.00, a_vista: 166.00 }, 11: { total: 120.00, parcelas: 2, valor_parcela: 60.00, a_vista: 110.00 }, 12: { total: 60.00, parcelas: 1, valor_parcela: 60.00, a_vista: 60.00 } };
-  const ouro_premium_pricing = { 1: { total: 1140.00, parcelas: 12, valor_parcela: 95.00, a_vista: 1046.00 }, 2: { total: 1045.00, parcelas: 11, valor_parcela: 95.00, a_vista: 961.00 }, 3: { total: 950.00, parcelas: 10, valor_parcela: 95.00, a_vista: 874.00 }, 4: { total: 855.00, parcelas: 9, valor_parcela: 95.00, a_vista: 787.00 }, 5: { total: 760.00, parcelas: 8, valor_parcela: 95.00, a_vista: 700.00 }, 6: { total: 665.00, parcelas: 7, valor_parcela: 95.00, a_vista: 611.00 }, 7: { total: 570.00, parcelas: 6, valor_parcela: 95.00, a_vista: 524.00 }, 8: { total: 475.00, parcelas: 5, valor_parcela: 95.00, a_vista: 437.00 }, 9: { total: 380.00, parcelas: 4, valor_parcela: 95.00, a_vista: 350.00 }, 10: { total: 285.00, parcelas: 3, valor_parcela: 95.00, a_vista: 263.00 }, 11: { total: 190.00, parcelas: 2, valor_parcela: 95.00, a_vista: 175.00 }, 12: { total: 95.00, parcelas: 1, valor_parcela: 95.00, a_vista: 95.00 } };
-  const prata_aescon_pricing = { 1: { total: 420.00, parcelas: 12, valor_parcela: 35.00, a_vista: 386.00 }, 2: { total: 385.00, parcelas: 11, valor_parcela: 35.00, a_vista: 354.00 }, 3: { total: 350.00, parcelas: 10, valor_parcela: 35.00, a_vista: 322.00 }, 4: { total: 315.00, parcelas: 9, valor_parcela: 35.00, a_vista: 290.00 }, 5: { total: 280.00, parcelas: 8, valor_parcela: 35.00, a_vista: 258.00 }, 6: { total: 245.00, parcelas: 7, valor_parcela: 35.00, a_vista: 225.00 }, 7: { total: 210.00, parcelas: 6, valor_parcela: 35.00, a_vista: 193.00 }, 8: { total: 175.00, parcelas: 5, valor_parcela: 35.00, a_vista: 161.00 }, 9: { total: 140.00, parcelas: 4, valor_parcela: 35.00, a_vista: 129.00 }, 10: { total: 105.00, parcelas: 3, valor_parcela: 35.00, a_vista: 97.00 }, 11: { total: 70.00, parcelas: 2, valor_parcela: 35.00, a_vista: 65.00 }, 12: { total: 35.00, parcelas: 1, valor_parcela: 35.00, a_vista: 35.00 } };
+
+  // Assinatura
   const canvas = document.getElementById("signature-pad");
   const ctx = canvas.getContext("2d");
   let drawing = false;
   let lastX = 0, lastY = 0;
 
-  // Funções de desenho (Mantidas, por brevidade)
-  function drawLine(x1, y1, x2, y2) { /* ... */ }
-  canvas.addEventListener("mousedown", (e) => { /* ... */ });
-  canvas.addEventListener("mousemove", (e) => { /* ... */ });
+  function drawLine(x1, y1, x2, y2) {
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.closePath();
+  }
+  canvas.addEventListener("mousedown", (e) => {
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    lastX = e.clientX - rect.left;
+    lastY = e.clientY - rect.top;
+  });
+  canvas.addEventListener("mousemove", (e) => {
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    drawLine(lastX, lastY, x, y);
+    lastX = x;
+    lastY = y;
+  });
   canvas.addEventListener("mouseup", () => drawing = false);
   canvas.addEventListener("mouseout", () => drawing = false);
-  canvas.addEventListener("touchstart", (e) => { /* ... */ }, { passive: false });
-  canvas.addEventListener("touchmove", (e) => { /* ... */ }, { passive: false });
+  canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    lastX = t.clientX - rect.left;
+    lastY = t.clientY - rect.top;
+  }, { passive: false });
+  canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    const x = t.clientX - rect.left;
+    const y = t.clientY - rect.top;
+    drawLine(lastX, lastY, x, y);
+    lastX = x;
+    lastY = y;
+  }, { passive: false });
   canvas.addEventListener("touchend", () => drawing = false);
   document.getElementById("clearBtn").addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
-  
+
   // Evento de CNPJ
   cnpjInput.addEventListener('input', async () => {
     const cnpj = cnpjInput.value.replace(/\D/g, '');
     if (cnpj.length === 14) {
       resultDiv.textContent = 'Buscando dados do CNPJ...';
-      sendBtn.disabled = true;
+      sendBtn.disabled = true; // Desabilita o botão ao iniciar a busca
+      
+      // Limpar campos de plano e info para nova busca
+      planoInput.value = '';
+      planoInfo.textContent = '';
+      sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
+
       try {
         const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
         const data = await response.json();
@@ -217,16 +284,17 @@
           planoInput.value = planoSugerido || '';
           
           if (planoSugerido && (planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora'))) {
+            // Se for plano de exclusão (Fora de escopo), ele permanece desabilitado
             planoInfo.innerHTML = `<span style="color:red;font-weight:bold;">${planoSugerido}</span>`;
             sendBtn.disabled = true;
           } else {
+            // Se for um plano válido (Ouro, Prata, Aescon), ele HABILITA O BOTÃO
             const planoInfoData = getPlanoInfo(planoSugerido);
             planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
-            sendBtn.disabled = false;
+            sendBtn.disabled = false; // HABILITA AQUI
           }
 
           // Carrega os sócios
-          sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
           if (data.qsa && data.qsa.length > 0) {
             data.qsa.forEach(socio => {
               const option = document.createElement('option');
@@ -239,11 +307,9 @@
         } else {
           resultDiv.textContent = `❌ Erro: CNPJ não encontrado ou inválido.`;
           sendBtn.disabled = true;
+          // Limpa tudo se CNPJ for inválido
           razaoInput.value = '';
           enderecoInput.value = '';
-          planoInput.value = '';
-          planoInfo.textContent = '';
-          sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
         }
       } catch (error) {
         resultDiv.textContent = `❌ Erro na requisição: ${error.message}. Verifique sua conexão.`;
@@ -259,6 +325,12 @@
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     resultDiv.textContent = 'Gerando PDF...';
+
+    // Verificação adicional para garantir que o botão só funciona se o plano for válido e campos preenchidos
+    if (sendBtn.disabled) {
+        resultDiv.textContent = 'Preencha todos os campos obrigatórios e verifique a elegibilidade do CNPJ.';
+        return;
+    }
 
     const dados = {};
     const formData = new FormData(form);

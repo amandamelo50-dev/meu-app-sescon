@@ -108,7 +108,7 @@
       "0230600", "5229002", "5229099", "5240101", "5250804", "5250805", "6461100", "6462000", "6463800",
       "6611801", "6611802", "6611803", "6611804", "6612605", "6613400", "6619302", "6619303", "6619399",
       "6621501", "6621502", "6629100", "6630400", "6911702", "6911703", "7020400", "7119701", "7119702",
-      "7119703", "7119704", "7120100", "7120100", "7210000", "7220700", "7319004", "7319002", "7420002", "7420005",
+      "7119703", "7119704", "7120100", "7210000", "7220700", "7319004", "7319002", "7420002", "7420005",
       "7490101", "7490103", "7490104", "7490105", "7490199", "8020000", "8211300", "8219999", "8550302",
       "8599604", "8660700", "9411100", "9412000", "9430800", "9491000", "9499500" ,"8299799","7320300"
   ]);
@@ -160,8 +160,17 @@
       if (cidades_santos.has(cidade)) {
           return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
       }
+      
+      // 4. Se a cidade for SAO PAULO (sanitizada fica 'sao paulo'), ela passa direto aqui.
+      if (cidade === "sao paulo") {
+        // CNAE 6920601 é Ouro Premium e a cidade é a Capital, que não tem restrição
+        if (planoBase === "Plano Ouro Premium") {
+            return "Plano Ouro Premium";
+        }
+        return planoBase;
+      }
 
-      // 4. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
+      // 5. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
       return planoBase;
   }
 

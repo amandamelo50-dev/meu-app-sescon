@@ -115,6 +115,10 @@
 
   // Funções
   function segmentar(cnae, cidade, uf) {
+      // *** DEBUG: Mostra o que está sendo processado ***
+      console.log(`[DEBUG] CNAE Recebido: ${cnae}`);
+      console.log(`[DEBUG] Cidade Recebida: ${cidade}`);
+
       // Regra 0: Fora do Estado de SP
       if (uf.toUpperCase() !== "SP") {
           return "Fora de SP – Não podemos associar.";
@@ -168,6 +172,7 @@
     const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
     const parcelas = valores.parcelas;
     const valorParcela = valores.valor_parcela ? `R$ ${valores.valor_parcela.toFixed(2).replace('.', ',')}` : "N/A";
+    // Ajusta a exibição para mostrar o total e as parcelas juntas
     const valorParcelado = parcelas && valorParcela ? `R$ ${valores.total.toFixed(2).replace('.', ',')} em ${parcelas}x de ${valorParcela}` : "N/A";
 
     return {
@@ -251,6 +256,7 @@
       resultDiv.textContent = 'Buscando dados do CNPJ...';
       sendBtn.disabled = true;
       try {
+        // Usa a API BrasilAPI para consultar os dados
         const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
         const data = await response.json();
         
@@ -262,6 +268,7 @@
           planoInput.value = planoSugerido || '';
           
           if (planoSugerido && (planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora'))) {
+            // Mensagens de Fora de Escopo/Regional em vermelho
             planoInfo.innerHTML = `<span style="color:red;font-weight:bold;">${planoSugerido}</span>`;
             sendBtn.disabled = true;
           } else {
@@ -270,7 +277,7 @@
             sendBtn.disabled = false;
           }
 
-          // Garante que o select do sócio seja limpo e tenha a opção padrão
+          // Carrega os sócios no select
           sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
           if (data.qsa && data.qsa.length > 0) {
             data.qsa.forEach(socio => {
@@ -335,7 +342,6 @@
     pdf.text(`Endereço: ${dados.endereco || ''}`, 10, y); y += 6;
     pdf.text(`E-mail: ${dados.email || ''}`, 10, y); y += 6;
     pdf.text(`Telefone: ${dados.telefone || ''}`, 10, y); y += 6;
-    // Puxa a lista de serviços com os códigos para o PDF
     pdf.text(`Serviços de Interesse: ${(dados.servicos_interesse || []).join(', ') || ''}`, 10, y); y += 10;
 
     // Dados do Sócio

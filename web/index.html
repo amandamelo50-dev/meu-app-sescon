@@ -29,30 +29,6 @@
 
       <label>Serviços de Interesse</label>
       <div id="servicos-interesse-container">
-          <label><input type="checkbox" name="servicos_interesse" value="149SERVICO DE INTERESSE - INSTITUCIONAL"> Institucional</label>
-          <label><input type="checkbox" name="servicos_interesse" value="150SERVICO DE INTERESSE - BOLSA DE TALENTOS"> Bolsa de Talentos</label>
-          <label><input type="checkbox" name="servicos_interesse" value="151SERVICO DE INTERESSE - CONVENCAO COLETIVA"> Convenção Coletiva</label>
-          <label><input type="checkbox" name="servicos_interesse" value="152SERVICO DE INTERESSE - CURSOS UNISESCON"> Cursos UNISESCON</label>
-          <label><input type="checkbox" name="servicos_interesse" value="153SERVICO DE INTERESSE - CONSULTORIAS JURIDICA - IOB TELEFONE"> Consultoria Jurídica - IOB Telefone</label>
-          <label><input type="checkbox" name="servicos_interesse" value="358SERVICO DE INTERESSE - CONSULTORIAS JURIDICA - IOB EXPLICA"> Consultoria Jurídica - IOB Explica</label>
-          <label><input type="checkbox" name="servicos_interesse" value="154SERVICO DE INTERESSE - ER JUCESP - FATURADO"> ER JUCESP - Faturado</label>
-          <label><input type="checkbox" name="servicos_interesse" value="155SERVICO DE INTERESSE - CERTIFICACAO DIGITAL"> Certificação Digital</label>
-          <label><input type="checkbox" name="servicos_interesse" value="156SERVICO DE INTERESSE - CONTABIL STORE"> Contábil Store</label>
-          <label><input type="checkbox" name="servicos_interesse" value="157SERVICO DE INTERESSE - PESQUISAS"> Pesquisas</label>
-          <label><input type="checkbox" name="servicos_interesse" value="158SERVICO DE INTERESSE - SOCIETARIO E LEGAL"> Societário e Legal</label>
-          <label><input type="checkbox" name="servicos_interesse" value="159SERVICO DE INTERESSE - PROJETO LGPD"> Projeto LGPD</label>
-          <label><input type="checkbox" name="servicos_interesse" value="160SERVICO DE INTERESSE - PQEC"> PQEC</label>
-          <label><input type="checkbox" name="servicos_interesse" value="161SERVICO DE INTERESSE - EVENTOS"> Eventos</label>
-          <label><input type="checkbox" name="servicos_interesse" value="165SERVICO DE INTERESSE - ENDERECO FISCAL"> Endereço Fiscal</label>
-          <label><input type="checkbox" name="servicos_interesse" value="166SERVICO DE INTERESSE - COWORKING"> Coworking</label>
-          <label><input type="checkbox" name="servicos_interesse" value="306SERVICO DE INTERESSE - LOCACAO DE AUDITORIO"> Locação de Auditório</label>
-          <label><input type="checkbox" name="servicos_interesse" value="315SERVICO DE INTERESSE - NAO INFORMADO AINDA"> Não Informado Ainda</label>
-          <label><input type="checkbox" name="servicos_interesse" value="317SERVICO DE INTERESSE - PARCERIAS"> Parcerias</label>
-          <label><input type="checkbox" name="servicos_interesse" value="342SERVICO DE INTERESSE - RECEITA FEDERAL"> Receita Federal</label>
-          <label><input type="checkbox" name="servicos_interesse" value="343SERVICO DE INTERESSE - CENTRAL DE SERVIÇOS"> Central de Serviços</label>
-          <label><input type="checkbox" name="servicos_interesse" value="344SERVICO DE INTERESSE - CCT"> CCT</label>
-          <label><input type="checkbox" name="servicos_interesse" value="347SERVIÇO DE INTERESSE - CERTIFICADO DIGITAL GRATUITO"> Certificado Digital Gratuito</label>
-          <label><input type="checkbox" name="servicos_interesse" value="348SERVICO DE INTERESSE - CONTRIBUIÇÃO REPRESENTATIVA"> Contribuição Representativa</label>
       </div>
 
       <label>Plano Sugerido</label>
@@ -91,6 +67,63 @@
 <script>
   window.jsPDF = window.jspdf.jsPDF;
 
+  // --------------------------------------------------------------------------------
+  // 1. LISTA DE SERVIÇOS (Corrigida e Ordenada Alfabeticamente)
+  // --------------------------------------------------------------------------------
+  const listaServicos = [
+    { id: '343', nome: 'CENTRAL DE SERVIÇOS' },
+    { id: '155', nome: 'CERTIFICAÇÃO DIGITAL' },
+    { id: '347', nome: 'CERTIFICADO DIGITAL GRATUITO' },
+    { id: '150', nome: 'BOLSA DE TALENTOS' },
+    { id: '156', nome: 'CONTÁBIL STORE' },
+    { id: '348', nome: 'CONTRIBUIÇÃO REPRESENTATIVA' },
+    { id: '153', nome: 'CONSULTORIA JURÍDICA - IOB TELEFONE' },
+    { id: '358', nome: 'CONSULTORIA JURÍDICA - IOB EXPLICA' },
+    { id: '151', nome: 'CONVENÇÃO COLETIVA' },
+    { id: '166', nome: 'COWORKING' },
+    { id: '152', nome: 'CURSOS UNISESCON' },
+    { id: '165', nome: 'ENDEREÇO FISCAL' },
+    { id: '154', nome: 'ER JUCESP - FATURADO' },
+    { id: '161', nome: 'EVENTOS' },
+    { id: '149', nome: 'INSTITUCIONAL' },
+    { id: '306', nome: 'LOCAÇÃO DE AUDITÓRIO' },
+    { id: '315', nome: 'NÃO INFORMADO AINDA' },
+    { id: '317', nome: 'PARCERIAS' },
+    { id: '157', nome: 'PESQUISAS' },
+    { id: '160', nome: 'PQEC' },
+    { id: '159', nome: 'PROJETO LGPD' },
+    { id: '342', nome: 'RECEITA FEDERAL' },
+    { id: '158', nome: 'SOCIETÁRIO E LEGAL' },
+  ];
+  // A ordenação é garantida aqui se a lista não estiver em ordem. Mas a lista já foi organizada manualmente acima.
+
+  // --------------------------------------------------------------------------------
+  // 2. FUNÇÃO PARA GERAR O HTML DA LISTA DE SERVIÇOS
+  // --------------------------------------------------------------------------------
+  function renderizarServicos() {
+    const container = document.getElementById('servicos-interesse-container');
+    let htmlContent = '';
+    
+    listaServicos.forEach(servico => {
+      // O valor (value) do checkbox é padronizado como "IDSERVICO DE INTERESSE - NOME" em MAIÚSCULAS
+      const value = `${servico.id}SERVICO DE INTERESSE - ${servico.nome}`;
+      
+      htmlContent += `<label>
+                        <input type="checkbox" name="servicos_interesse" value="${value.toUpperCase()}"> 
+                        ${servico.nome}
+                      </label>`;
+    });
+
+    container.innerHTML = htmlContent;
+  }
+  // Chamada da função para exibir a lista assim que o script carregar
+  document.addEventListener('DOMContentLoaded', renderizarServicos);
+
+
+  // --------------------------------------------------------------------------------
+  // 3. LÓGICA DE NEGÓCIO E FUNÇÕES
+  // --------------------------------------------------------------------------------
+
   // Função para remover acentos e caracteres especiais
   function sanitizeCity(city) {
       if (!city) return "";
@@ -123,13 +156,13 @@
   const ouro_premium_pricing = { 1: { total: 1140.00, parcelas: 12, valor_parcela: 95.00, a_vista: 1046.00 }, 2: { total: 1045.00, parcelas: 11, valor_parcela: 95.00, a_vista: 961.00 }, 3: { total: 950.00, parcelas: 10, valor_parcela: 95.00, a_vista: 874.00 }, 4: { total: 855.00, parcelas: 9, valor_parcela: 95.00, a_vista: 787.00 }, 5: { total: 760.00, parcelas: 8, valor_parcela: 95.00, a_vista: 700.00 }, 6: { total: 665.00, parcelas: 7, valor_parcela: 95.00, a_vista: 611.00 }, 7: { total: 570.00, parcelas: 6, valor_parcela: 95.00, a_vista: 524.00 }, 8: { total: 475.00, parcelas: 5, valor_parcela: 95.00, a_vista: 437.00 }, 9: { total: 380.00, parcelas: 4, valor_parcela: 95.00, a_vista: 350.00 }, 10: { total: 285.00, parcelas: 3, valor_parcela: 95.00, a_vista: 263.00 }, 11: { total: 190.00, parcelas: 2, valor_parcela: 95.00, a_vista: 175.00 }, 12: { total: 95.00, parcelas: 1, valor_parcela: 95.00, a_vista: 95.00 } };
   const prata_aescon_pricing = { 1: { total: 420.00, parcelas: 12, valor_parcela: 35.00, a_vista: 386.00 }, 2: { total: 385.00, parcelas: 11, valor_parcela: 35.00, a_vista: 354.00 }, 3: { total: 350.00, parcelas: 10, valor_parcela: 35.00, a_vista: 322.00 }, 4: { total: 315.00, parcelas: 9, valor_parcela: 35.00, a_vista: 290.00 }, 5: { total: 280.00, parcelas: 8, valor_parcela: 35.00, a_vista: 258.00 }, 6: { total: 245.00, parcelas: 7, valor_parcela: 35.00, a_vista: 225.00 }, 7: { total: 210.00, parcelas: 6, valor_parcela: 35.00, a_vista: 193.00 }, 8: { total: 175.00, parcelas: 5, valor_parcela: 35.00, a_vista: 161.00 }, 9: { total: 140.00, parcelas: 4, valor_parcela: 35.00, a_vista: 129.00 }, 10: { total: 105.00, parcelas: 3, valor_parcela: 35.00, a_vista: 97.00 }, 11: { total: 70.00, parcelas: 2, valor_parcela: 35.00, a_vista: 65.00 }, 12: { total: 35.00, parcelas: 1, valor_parcela: 35.00, a_vista: 35.00 } };
 
-  // Funções
+  // Funções de Segmentação
   function segmentar(cnae, cidade, uf) {
-      // *** CORREÇÃO: Aplica TRIM para remover espaços invisíveis que a API pode ter adicionado ***
-      const cnae_limpo = cnae.trim();
+      // *** CORREÇÃO: Garante que cnae é uma string (usando String(cnae || '')) antes de tentar .trim() ***
+      const cnae_str = String(cnae || '').trim();
       const cidade_limpa = cidade.trim();
 
-      console.log(`[DEBUG] CNAE Recebido: ${cnae_limpo}`);
+      console.log(`[DEBUG] CNAE Recebido: ${cnae_str}`);
       console.log(`[DEBUG] Cidade Recebida Sanitizada: ${cidade_limpa}`);
 
       // Regra 0: Fora do Estado de SP
@@ -139,9 +172,9 @@
       
       // 1. VERIFICAÇÃO PRINCIPAL DE CNAE (Ouro, Prata ou Fora de Escopo)
       let planoBase = null;
-      if (cnaes_ouro.has(cnae_limpo)) { // Usa cnae_limpo
+      if (cnaes_ouro.has(cnae_str)) { 
           planoBase = "Plano Ouro Premium";
-      } else if (cnaes_prata.has(cnae_limpo)) { // Usa cnae_limpo
+      } else if (cnaes_prata.has(cnae_str)) { 
           planoBase = "Plano Prata";
       } else {
           // Se o CNAE não estiver em NENHUMA lista, ele é fora de escopo.
@@ -164,10 +197,7 @@
           return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
       }
       
-      // 4. Se a cidade é a Capital, que não tem restrição, retorna o plano base.
-      // A capital é tratada como todas as outras cidades elegíveis que não estão nas listas de exclusão.
-      
-      // 5. RESULTADO FINAL: Se passou por tudo, retorna o plano base.
+      // 4. Retorna o plano base se não houver restrições regionais (caso da capital 'sao paulo' e outras cidades sem convênio local)
       return planoBase;
   }
 
@@ -206,7 +236,9 @@
   const resultDiv = document.getElementById("result");
   const form = document.getElementById("fichaForm");
 
-  // Assinatura (Mantida)
+  // --------------------------------------------------------------------------------
+  // 4. LÓGICA DE ASSINATURA E EVENTOS
+  // --------------------------------------------------------------------------------
   const canvas = document.getElementById("signature-pad");
   const ctx = canvas.getContext("2d");
   let drawing = false;
@@ -283,18 +315,16 @@
           razaoInput.value = data.razao_social || '';
           enderecoInput.value = `${data.logradouro || ''}, ${data.numero || ''}, ${data.bairro || ''} - ${data.municipio || ''}/${data.uf || ''}`;
           
-          // APLICA A SANITIZAÇÃO COMPLETA: garante que o nome da cidade é limpo antes da segmentação
           const municipioSanitizado = sanitizeCity(data.municipio);
           
+          // O cnae_fiscal é passado para a função segmentar, onde a correção foi aplicada
           const planoSugerido = segmentar(data.cnae_fiscal, municipioSanitizado, data.uf);
           planoInput.value = planoSugerido || '';
           
           if (planoSugerido && (planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora'))) {
-            // Se for plano de exclusão (Fora de escopo), ele permanece desabilitado
             planoInfo.innerHTML = `<span style="color:red;font-weight:bold;">${planoSugerido}</span>`;
             sendBtn.disabled = true;
           } else {
-            // Se for um plano válido (Ouro, Prata, Aescon), ele HABILITA O BOTÃO
             const planoInfoData = getPlanoInfo(planoSugerido);
             planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
             sendBtn.disabled = false; // HABILITA AQUI
@@ -313,7 +343,6 @@
         } else {
           resultDiv.textContent = `❌ Erro: CNPJ não encontrado ou inválido.`;
           sendBtn.disabled = true;
-          // Limpa tudo se CNPJ for inválido
           razaoInput.value = '';
           enderecoInput.value = '';
         }
@@ -327,7 +356,7 @@
     }
   });
 
-  // Geração do PDF (Mantida)
+  // Geração do PDF
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     resultDiv.textContent = 'Gerando PDF...';
@@ -354,7 +383,7 @@
 
     // Cabeçalho
     pdf.setFontSize(16);
-    pdf.text("Ficha de Inscrição - Associação SESCON-SP / AESCON-SP", 10, y);
+    pdf.text("FICHA DE INSCRIÇÃO - ASSOCIAÇÃO SESCON-SP / AESCON-SP", 10, y);
     y += 15;
 
     // Dados da Empresa
@@ -362,30 +391,31 @@
     pdf.text("DADOS DA EMPRESA", 10, y);
     y += 10;
     pdf.setFontSize(10);
-    pdf.text(`Razão Social: ${dados.razao || ''}`, 10, y); y += 6;
+    pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, 10, y); y += 6;
     pdf.text(`CNPJ: ${dados.cnpj || ''}`, 10, y); y += 6;
-    pdf.text(`Endereço: ${dados.endereco || ''}`, 10, y); y += 6;
-    pdf.text(`E-mail: ${dados.email || ''}`, 10, y); y += 6;
-    pdf.text(`Telefone: ${dados.telefone || ''}`, 10, y); y += 6;
-    pdf.text(`Serviços de Interesse: ${(dados.servicos_interesse || []).join(', ') || ''}`, 10, y); y += 10;
+    pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, 10, y); y += 6;
+    pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, 10, y); y += 6;
+    pdf.text(`TELEFONE: ${dados.telefone || ''}`, 10, y); y += 6;
+    // Serviços de Interesse é um array de strings já em MAIÚSCULAS
+    pdf.text(`SERVIÇOS DE INTERESSE: ${(dados.servicos_interesse || []).join(', ') || ''}`, 10, y); y += 10;
 
     // Dados do Sócio
     pdf.setFontSize(12);
     pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", 10, y);
     y += 10;
     pdf.setFontSize(10);
-    pdf.text(`Nome Completo: ${dados.nome_socio || ''}`, 10, y); y += 6;
-    pdf.text(`CPF do Sócio: ${dados.cpf_socio || ''}`, 10, y); y += 10;
+    pdf.text(`NOME COMPLETO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, 10, y); y += 6;
+    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, 10, y); y += 10;
 
     // Plano Sugerido
     pdf.setFontSize(12);
     pdf.text("PLANO SUGERIDO", 10, y);
     y += 10;
     pdf.setFontSize(10);
-    pdf.text(`Plano Sugerido: ${dados.plano || ''}`, 10, y); y += 6;
+    pdf.text(`PLANO SUGERIDO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, 10, y); y += 6;
     const planoInfoData = getPlanoInfo(dados.plano);
-    pdf.text(`Valor À Vista: ${planoInfoData.valor_a_vista}`, 10, y); y += 6;
-    pdf.text(`Valor Parcelado: ${planoInfoData.valor_parcelado}`, 10, y); y += 10;
+    pdf.text(`VALOR À VISTA: ${planoInfoData.valor_a_vista}`, 10, y); y += 6;
+    pdf.text(`VALOR PARCELADO: ${planoInfoData.valor_parcelado}`, 10, y); y += 10;
 
     // Assinatura
     const signatureImage = canvas.toDataURL("image/png");
@@ -394,7 +424,7 @@
     }
     y += 40;
     pdf.text("________________________________", 10, y); y += 6;
-    pdf.text("Assinatura do Sócio da Empresa", 10, y);
+    pdf.text("ASSINATURA DO SÓCIO DA EMPRESA", 10, y);
 
     const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);

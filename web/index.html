@@ -163,10 +163,10 @@
   function segmentar(cnae, cidade, uf) {
       // CORREÇÃO: Garante que cnae é uma string, resolvendo o erro 'cnae.trim is not a function'
       const cnae_str = String(cnae || '').trim();
-      const cidade_limpa = cidade.trim();
-
-      console.log(`[DEBUG] CNAE Recebido: ${cnae_str}`);
-      console.log(`[DEBUG] Cidade Recebida Sanitizada: ${cidade_limpa}`);
+      const cidade_limpa = sanitizeCity(cidade); // Usa a função sanitizeCity para limpar acentos
+      
+      // console.log(`[DEBUG] CNAE Recebido: ${cnae_str}`);
+      // console.log(`[DEBUG] Cidade Recebida Sanitizada: ${cidade_limpa}`);
 
       // Regra 0: Fora do Estado de SP
       if (uf.toUpperCase() !== "SP") {
@@ -213,7 +213,7 @@
     } else if (plano === "Prata Aescon") {
         tabela = prata_aescon_pricing;
     } else {
-        return { valor_a_vista: "N/A", valor_parcelado: "N/A" };
+        return { valor_a_vista: "N/A", valor_parcelado: "N/A", valor_a_vista_raw: "N/A" };
     }
     const valores = tabela[mesAtual] || {};
     const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
@@ -224,6 +224,7 @@
     return {
         valor_a_vista: aVista,
         valor_parcelado: valorParcelado,
+        valor_a_vista_raw: valores.a_vista // Usado para cálculo posterior se necessário
     };
   }
 
@@ -367,7 +368,7 @@
   });
 
   // --------------------------------------------------------------------------------
-  // 4. GERAÇÃO DO PDF (COMPLETO)
+  // 4. GERAÇÃO DO PDF (COMPLETO E ORGANIZADO)
   // --------------------------------------------------------------------------------
 
   form.addEventListener("submit", async (ev) => {
@@ -415,60 +416,92 @@
         valorTotal = `R$ ${valoresMes.total.toFixed(2).replace('.', ',')}`;
     }
 
-    // CABEÇALHO
-    pdf.setFontSize(16);
+    // =========================================================================
+    // CORREÇÃO E INCLUSÃO DO LOGO E CABEÇALHO
+    // =========================================================================
+    // Tenta carregar o logo (A imagem deve estar na mesma pasta)
+    try {
+        const logo = new Image();
+        // Nota: O nome 'sescon_sp_logo.png.png' é o nome do arquivo que você enviou
+        logo.src = 'sescon_sp_logo.png.png'; 
+        // Adiciona a imagem no canto superior direito
+        pdf.addImage(logo.src, 'PNG', 150, 10, 50, 15);
+        y = 30; // Ajusta o ponto de partida do texto
+    } catch (e) {
+        console.warn("Erro ao carregar imagem para o PDF. Verifique se 'sescon_sp_logo.png.png' está na mesma pasta. Erro: ", e);
+        y = 20;
+    }
+
+    pdf.setFontSize(14);
     pdf.text("FICHA DE INSCRIÇÃO - ASSOCIAÇÃO SESCON-SP / AESCON-SP", padding, y);
     y += 15;
-
+    
+    // =========================================================================
     // DADOS DA EMPRESA
+    // =========================================================================
     pdf.setFontSize(12);
+    pdf.setFontStyle('bold'); // Negrito para o título
     pdf.text("DADOS DA EMPRESA", padding, y);
-    y += 10;
-    pdf.setFontSize(10);
-    pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 6;
-    pdf.text(`CNPJ: ${dados.cnpj || ''}`, padding, y); y += 6;
-    pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 6;
-    pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, padding, y); y += 6;
-    pdf.text(`TELEFONE: ${dados.telefone || ''}`, padding, y); y += 6;
-    pdf.text(`RAMO DE ATIVIDADE (CNAE): ${cnae_fiscal || 'N/A'}`, padding, y); y += 6;
+    pdf.setFontStyle('normal'); // Volta ao normal
+    y += 8;
     
+    pdf.setFontSize(10);
+    pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 5;
+    pdf.text(`CNPJ: ${dados.cnpj || ''}`, padding, y); y += 5;
+    pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 5;
+    pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, padding, y); y += 5;
+    pdf.text(`TELEFONE: ${dados.telefone || ''}`, padding, y); y += 5;
+    pdf.text(`RAMO DE ATIVIDADE (CNAE): ${cnae_fiscal || 'N/A'}`, padding, y); y += 8;
+
     // Serviços de Interesse
-    pdf.text("SERVIÇOS DE INTERESSE:", padding, y); y += 5;
+    pdf.setFontStyle('bold');
+    pdf.text("SERVIÇOS DE INTERESSE:", padding, y);
+    pdf.setFontStyle('normal');
+    y += 5;
     const servicosText = (dados.servicos_interesse || []).map(s => s.split(' - ')[1] || s).join(', ');
-    pdf.text(servicosText, padding + 5, y); y += 8;
-
-    // DADOS DO SÓCIO
-    pdf.setFontSize(12);
-    pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", padding, y);
-    y += 10;
-    pdf.setFontSize(10);
-    pdf.text(`NOME COMPLETO DO SÓCIO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, padding, y); y += 6;
-    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, padding, y); y += 10;
-
-    // PLANO SUGERIDO E PAGAMENTO
-    pdf.setFontSize(12);
-    pdf.text("PLANO SUGERIDO", padding, y);
-    y += 10;
-    pdf.setFontSize(10);
-    pdf.text(`PLANO SUGERIDO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, padding, y); y += 6;
-    pdf.text(`Este plano inclui associação ao ${dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP"}.`, padding, y); y += 8;
+    pdf.text(servicosText, padding + 5, y); y += 10;
     
+    // =========================================================================
+    // PLANO SUGERIDO E PAGAMENTO - DESTAQUE
+    // =========================================================================
     pdf.setFontSize(12);
-    pdf.text("FORMA DE PAGAMENTO SUGERIDA", padding, y);
-    y += 10;
+    pdf.setFontStyle('bold');
+    pdf.text("PLANO SUGERIDO", padding, y);
+    pdf.setFontStyle('normal');
+    y += 8;
+    
     pdf.setFontSize(10);
-    pdf.text(`FORMA DE PAGAMENTO: ${dados.forma_pagamento.toUpperCase()}`, padding, y); y += 6;
-    pdf.text(`VALOR TOTAL: ${valorTotal}`, padding, y); y += 8;
+    pdf.text(`PLANO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, padding, y); y += 5;
+    pdf.text(`ASSOCIAÇÃO: ${dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP"}`, padding, y); y += 8;
 
-    // OBSERVAÇÕES E DECLARAÇÃO
+    pdf.setFontSize(12);
+    pdf.setFontStyle('bold');
+    pdf.text("FORMA DE PAGAMENTO", padding, y);
+    pdf.setFontStyle('normal');
+    y += 8;
+    
+    pdf.setFontSize(10);
+    pdf.text(`MODALIDADE: ${dados.forma_pagamento.toUpperCase()}`, padding, y); y += 5;
+    pdf.text(`VALOR TOTAL (ANUIDADE PROPORCIONAL): ${valorTotal}`, padding, y); y += 8;
+
+    // OBSERVAÇÕES
     pdf.setFontSize(8);
     pdf.text("A anuidade informada refere-se ao valor proporcional aos meses restantes do ano corrente.", padding, y); y += 4;
-    pdf.text("No próximo ciclo de renovação, o valor será referente à anuidade integral.", padding, y); y += 8;
+    pdf.text("No próximo ciclo de renovação, o valor será referente à anuidade integral.", padding, y); y += 10;
+    
+    // =========================================================================
+    // DADOS DO SÓCIO/RODAPÉ
+    // =========================================================================
+    pdf.setFontSize(12);
+    pdf.setFontStyle('bold');
+    pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", padding, y);
+    pdf.setFontStyle('normal');
+    y += 8;
     
     pdf.setFontSize(10);
-    pdf.text("Declaro estar de acordo com as políticas de associação do SESCON-SP e solicito análise para me tornar associado.", padding, y); y += 5;
-    pdf.text("Ao enviar esta ficha assinada, para associados@sescon.org.br, estou ciente e de acordo com o processo de associação.", padding, y); y += 15;
-    
+    pdf.text(`NOME COMPLETO DO SÓCIO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, padding, y); y += 5;
+    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, padding, y); y += 10;
+
     // Rodapé de Dados
     pdf.text(`EMPRESA: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 4;
     const dataHora = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });

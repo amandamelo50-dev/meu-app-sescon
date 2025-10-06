@@ -483,16 +483,16 @@
     pdf.text("________________________________", padding, y); y += 6;
     pdf.text("ASSINATURA DO SÓCIO DA EMPRESA", padding, y);
 
-    // Geração do arquivo
-    const nomeArquivo = `Ficha_Inscricao_${dados.razao.replace(/[^a-zA-Z0-9]/g, '_')}_${dados.cnpj.replace(/\D/g, '')}.pdf`;
+    // Geração do arquivo (CORREÇÃO DO ERRO 'replace' AQUI)
+    const nomeArquivo = `Ficha_Inscricao_${(dados.razao || '').replace(/[^a-zA-Z0-9]/g, '_')}_${dados.cnpj.replace(/\D/g, '')}.pdf`;
     const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.getElementById("downloadLink");
     link.href = url;
     link.download = nomeArquivo;
     link.style.display = "inline-block";
-    link.textContent = "📥 Baixar PDF gerado";
     resultDiv.textContent = "✅ PDF gerado com sucesso.";
+    link.textContent = `📥 Baixar PDF gerado`; 
   });
 
 </script>

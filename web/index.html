@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <title>Ficha de Associação - SESCON</title>
+  
+  <link rel="icon" type="image/png" href="sescon_sp_logo.png.png">
+
   <link rel="stylesheet" href="style.css" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -68,7 +71,7 @@
   window.jsPDF = window.jspdf.jsPDF;
 
   // --------------------------------------------------------------------------------
-  // 1. LISTA DE SERVIÇOS (Corrigida e Ordenada Alfabeticamente)
+  // 1. LISTA DE SERVIÇOS (Ordenada Alfabeticamente)
   // --------------------------------------------------------------------------------
   const listaServicos = [
     { id: '343', nome: 'CENTRAL DE SERVIÇOS' },
@@ -95,11 +98,7 @@
     { id: '342', nome: 'RECEITA FEDERAL' },
     { id: '158', nome: 'SOCIETÁRIO E LEGAL' },
   ];
-  // A ordenação é garantida aqui se a lista não estiver em ordem. Mas a lista já foi organizada manualmente acima.
-
-  // --------------------------------------------------------------------------------
-  // 2. FUNÇÃO PARA GERAR O HTML DA LISTA DE SERVIÇOS
-  // --------------------------------------------------------------------------------
+  
   function renderizarServicos() {
     const container = document.getElementById('servicos-interesse-container');
     let htmlContent = '';
@@ -116,23 +115,27 @@
 
     container.innerHTML = htmlContent;
   }
-  // Chamada da função para exibir a lista assim que o script carregar
   document.addEventListener('DOMContentLoaded', renderizarServicos);
 
 
+  // Variáveis para guardar dados do CNPJ para uso no PDF (evita re-busca no submit)
+  let cnaeGlobal = '';
+  let municipioGlobal = '';
+  let ufGlobal = '';
+
+
   // --------------------------------------------------------------------------------
-  // 3. LÓGICA DE NEGÓCIO E FUNÇÕES
+  // 2. LÓGICA DE NEGÓCIO (CNAEs, Cidades e Segmentação)
   // --------------------------------------------------------------------------------
 
-  // Função para remover acentos e caracteres especiais
   function sanitizeCity(city) {
       if (!city) return "";
       return city
-          .toLowerCase() // Converte para minúsculas
-          .normalize("NFD") // Decompõe caracteres acentuados
-          .replace(/[\u0300-\u036f]/g, "") // Remove os acentos
-          .replace(/[^a-z0-9\s]/g, "") // Remove caracteres que não são letras/números/espaço
-          .trim(); // Remove espaços em branco
+          .toLowerCase() 
+          .normalize("NFD") 
+          .replace(/[\u0300-\u036f]/g, "") 
+          .replace(/[^a-z0-9\s]/g, "") 
+          .trim(); 
   }
 
   // Listas de CNAEs Elegíveis (Ouro e Prata)
@@ -158,7 +161,7 @@
 
   // Funções de Segmentação
   function segmentar(cnae, cidade, uf) {
-      // *** CORREÇÃO: Garante que cnae é uma string (usando String(cnae || '')) antes de tentar .trim() ***
+      // CORREÇÃO: Garante que cnae é uma string, resolvendo o erro 'cnae.trim is not a function'
       const cnae_str = String(cnae || '').trim();
       const cidade_limpa = cidade.trim();
 
@@ -177,7 +180,6 @@
       } else if (cnaes_prata.has(cnae_str)) { 
           planoBase = "Plano Prata";
       } else {
-          // Se o CNAE não estiver em NENHUMA lista, ele é fora de escopo.
           return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700";
       }
 
@@ -186,7 +188,7 @@
           return "Prata Aescon";
       }
       
-      // 3. EXCLUSÃO REGIONAL: Se a empresa é elegível (Ouro/Prata), mas está em uma cidade com convênio local, retorna o contato.
+      // 3. EXCLUSÃO REGIONAL
       if (cidades_tupa.has(cidade_limpa)) {
           return "Fora da região (Tupã). E-mail: sescontupan@unisite.com.br";
       }
@@ -197,7 +199,7 @@
           return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
       }
       
-      // 4. Retorna o plano base se não houver restrições regionais (caso da capital 'sao paulo' e outras cidades sem convênio local)
+      // 4. Retorna o plano base
       return planoBase;
   }
 
@@ -225,6 +227,10 @@
     };
   }
 
+  // --------------------------------------------------------------------------------
+  // 3. EVENTOS (CNPJ e Assinatura)
+  // --------------------------------------------------------------------------------
+
   // Elementos do DOM
   const cnpjInput = document.querySelector('input[name="cnpj"]');
   const razaoInput = document.querySelector('input[name="razao"]');
@@ -235,10 +241,6 @@
   const sendBtn = document.getElementById("sendBtn");
   const resultDiv = document.getElementById("result");
   const form = document.getElementById("fichaForm");
-
-  // --------------------------------------------------------------------------------
-  // 4. LÓGICA DE ASSINATURA E EVENTOS
-  // --------------------------------------------------------------------------------
   const canvas = document.getElementById("signature-pad");
   const ctx = canvas.getContext("2d");
   let drawing = false;
@@ -302,10 +304,14 @@
       resultDiv.textContent = 'Buscando dados do CNPJ...';
       sendBtn.disabled = true; 
       
-      // Limpar campos de plano e info para nova busca
       planoInput.value = '';
       planoInfo.textContent = '';
       sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
+
+      // Limpa dados globais
+      cnaeGlobal = '';
+      municipioGlobal = '';
+      ufGlobal = '';
 
       try {
         const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
@@ -315,10 +321,14 @@
           razaoInput.value = data.razao_social || '';
           enderecoInput.value = `${data.logradouro || ''}, ${data.numero || ''}, ${data.bairro || ''} - ${data.municipio || ''}/${data.uf || ''}`;
           
-          const municipioSanitizado = sanitizeCity(data.municipio);
+          // Armazena dados globais
+          cnaeGlobal = data.cnae_fiscal;
+          municipioGlobal = data.municipio;
+          ufGlobal = data.uf;
+
+          const municipioSanitizado = sanitizeCity(municipioGlobal);
           
-          // O cnae_fiscal é passado para a função segmentar, onde a correção foi aplicada
-          const planoSugerido = segmentar(data.cnae_fiscal, municipioSanitizado, data.uf);
+          const planoSugerido = segmentar(cnaeGlobal, municipioSanitizado, ufGlobal);
           planoInput.value = planoSugerido || '';
           
           if (planoSugerido && (planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora'))) {
@@ -327,7 +337,7 @@
           } else {
             const planoInfoData = getPlanoInfo(planoSugerido);
             planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
-            sendBtn.disabled = false; // HABILITA AQUI
+            sendBtn.disabled = false;
           }
 
           // Carrega os sócios
@@ -356,7 +366,10 @@
     }
   });
 
-  // Geração do PDF
+  // --------------------------------------------------------------------------------
+  // 4. GERAÇÃO DO PDF (COMPLETO)
+  // --------------------------------------------------------------------------------
+
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     resultDiv.textContent = 'Gerando PDF...';
@@ -377,60 +390,106 @@
         }
     }
 
+    // Usa os dados globais obtidos na busca do CNPJ
+    const cnae_fiscal = cnaeGlobal;
+    
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     let y = 20;
+    const padding = 10;
+    
+    // Obter dados de preço para o mês atual
+    const planoInfoData = getPlanoInfo(dados.plano);
+    const mesAtual = new Date().getMonth() + 1;
+    let tabelaPreco = {};
+    if (dados.plano === "Plano Prata") tabelaPreco = prata_pricing;
+    else if (dados.plano === "Plano Ouro Premium") tabelaPreco = ouro_premium_pricing;
+    else if (dados.plano === "Prata Aescon") tabelaPreco = prata_aescon_pricing;
 
-    // Cabeçalho
+    const valoresMes = tabelaPreco[mesAtual] || {};
+    let valorTotal = "N/A";
+
+    if (dados.forma_pagamento === "À vista") {
+        valorTotal = planoInfoData.valor_a_vista;
+    } else if (valoresMes.total) {
+        valorTotal = `R$ ${valoresMes.total.toFixed(2).replace('.', ',')}`;
+    }
+
+    // CABEÇALHO
     pdf.setFontSize(16);
-    pdf.text("FICHA DE INSCRIÇÃO - ASSOCIAÇÃO SESCON-SP / AESCON-SP", 10, y);
+    pdf.text("FICHA DE INSCRIÇÃO - ASSOCIAÇÃO SESCON-SP / AESCON-SP", padding, y);
     y += 15;
 
-    // Dados da Empresa
+    // DADOS DA EMPRESA
     pdf.setFontSize(12);
-    pdf.text("DADOS DA EMPRESA", 10, y);
+    pdf.text("DADOS DA EMPRESA", padding, y);
     y += 10;
     pdf.setFontSize(10);
-    pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, 10, y); y += 6;
-    pdf.text(`CNPJ: ${dados.cnpj || ''}`, 10, y); y += 6;
-    pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, 10, y); y += 6;
-    pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, 10, y); y += 6;
-    pdf.text(`TELEFONE: ${dados.telefone || ''}`, 10, y); y += 6;
-    // Serviços de Interesse é um array de strings já em MAIÚSCULAS
-    pdf.text(`SERVIÇOS DE INTERESSE: ${(dados.servicos_interesse || []).join(', ') || ''}`, 10, y); y += 10;
+    pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 6;
+    pdf.text(`CNPJ: ${dados.cnpj || ''}`, padding, y); y += 6;
+    pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 6;
+    pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, padding, y); y += 6;
+    pdf.text(`TELEFONE: ${dados.telefone || ''}`, padding, y); y += 6;
+    pdf.text(`RAMO DE ATIVIDADE (CNAE): ${cnae_fiscal || 'N/A'}`, padding, y); y += 6;
+    
+    // Serviços de Interesse
+    pdf.text("SERVIÇOS DE INTERESSE:", padding, y); y += 5;
+    const servicosText = (dados.servicos_interesse || []).map(s => s.split(' - ')[1] || s).join(', ');
+    pdf.text(servicosText, padding + 5, y); y += 8;
 
-    // Dados do Sócio
+    // DADOS DO SÓCIO
     pdf.setFontSize(12);
-    pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", 10, y);
+    pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", padding, y);
     y += 10;
     pdf.setFontSize(10);
-    pdf.text(`NOME COMPLETO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, 10, y); y += 6;
-    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, 10, y); y += 10;
+    pdf.text(`NOME COMPLETO DO SÓCIO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, padding, y); y += 6;
+    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, padding, y); y += 10;
 
-    // Plano Sugerido
+    // PLANO SUGERIDO E PAGAMENTO
     pdf.setFontSize(12);
-    pdf.text("PLANO SUGERIDO", 10, y);
+    pdf.text("PLANO SUGERIDO", padding, y);
     y += 10;
     pdf.setFontSize(10);
-    pdf.text(`PLANO SUGERIDO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, 10, y); y += 6;
-    const planoInfoData = getPlanoInfo(dados.plano);
-    pdf.text(`VALOR À VISTA: ${planoInfoData.valor_a_vista}`, 10, y); y += 6;
-    pdf.text(`VALOR PARCELADO: ${planoInfoData.valor_parcelado}`, 10, y); y += 10;
+    pdf.text(`PLANO SUGERIDO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, padding, y); y += 6;
+    pdf.text(`Este plano inclui associação ao ${dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP"}.`, padding, y); y += 8;
+    
+    pdf.setFontSize(12);
+    pdf.text("FORMA DE PAGAMENTO SUGERIDA", padding, y);
+    y += 10;
+    pdf.setFontSize(10);
+    pdf.text(`FORMA DE PAGAMENTO: ${dados.forma_pagamento.toUpperCase()}`, padding, y); y += 6;
+    pdf.text(`VALOR TOTAL: ${valorTotal}`, padding, y); y += 8;
 
-    // Assinatura
+    // OBSERVAÇÕES E DECLARAÇÃO
+    pdf.setFontSize(8);
+    pdf.text("A anuidade informada refere-se ao valor proporcional aos meses restantes do ano corrente.", padding, y); y += 4;
+    pdf.text("No próximo ciclo de renovação, o valor será referente à anuidade integral.", padding, y); y += 8;
+    
+    pdf.setFontSize(10);
+    pdf.text("Declaro estar de acordo com as políticas de associação do SESCON-SP e solicito análise para me tornar associado.", padding, y); y += 5;
+    pdf.text("Ao enviar esta ficha assinada, para associados@sescon.org.br, estou ciente e de acordo com o processo de associação.", padding, y); y += 15;
+    
+    // Rodapé de Dados
+    pdf.text(`EMPRESA: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 4;
+    const dataHora = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    pdf.text(`DATA DO PREENCHIMENTO: ${dataHora}`, padding, y); y += 6;
+
+    // ASSINATURA
     const signatureImage = canvas.toDataURL("image/png");
     if (signatureImage && signatureImage.length > "data:,".length) {
-        pdf.addImage(signatureImage, 'PNG', 10, y, 100, 30);
+        pdf.addImage(signatureImage, 'PNG', padding, y + 5, 100, 30);
     }
-    y += 40;
-    pdf.text("________________________________", 10, y); y += 6;
-    pdf.text("ASSINATURA DO SÓCIO DA EMPRESA", 10, y);
+    y += 45;
+    pdf.text("________________________________", padding, y); y += 6;
+    pdf.text("ASSINATURA DO SÓCIO DA EMPRESA", padding, y);
 
+    // Geração do arquivo
+    const nomeArquivo = `Ficha_Inscricao_${dados.razao.replace(/[^a-zA-Z0-9]/g, '_')}_${dados.cnpj.replace(/\D/g, '')}.pdf`;
     const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.getElementById("downloadLink");
     link.href = url;
-    link.download = "ficha_associacao.pdf";
+    link.download = nomeArquivo;
     link.style.display = "inline-block";
     link.textContent = "📥 Baixar PDF gerado";
     resultDiv.textContent = "✅ PDF gerado com sucesso.";

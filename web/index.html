@@ -19,10 +19,10 @@
       <input type="text" name="cnpj" placeholder="Somente números" maxlength="14">
 
       <label>Razão Social</label>
-      <input type="text" name="razao" required disabled>
+            <input type="text" name="razao" required readonly>
 
       <label>Endereço</label>
-      <input type="text" name="endereco" disabled>
+            <input type="text" name="endereco" readonly>
 
       <label>E-mail</label>
       <input type="email" name="email" placeholder="contato@empresa.com" required>
@@ -35,7 +35,7 @@
       </div>
 
       <label>Plano Sugerido</label>
-      <input type="text" name="plano" disabled>
+            <input type="text" name="plano" readonly>
       <p id="plano-info"></p>
 
       <label>Sócio/Responsável</label>
@@ -70,8 +70,8 @@
 <script>
   window.jsPDF = window.jspdf.jsPDF;
 
-  // Dados da imagem do logo em Base64 (para evitar erros 404)
-  const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4J39K+dM+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG+38vP7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA9/7T3wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgHf99e8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLdbefsDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
+  // Dados da imagem do logo em Base64 (para evitar erros 404/corrompido)
+  const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+dM+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgHf99e8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLdbefsDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
 
   // --------------------------------------------------------------------------------
   // 1. LISTA DE SERVIÇOS (Ordenada Alfabeticamente)
@@ -168,9 +168,6 @@
       const cnae_str = String(cnae || '').trim();
       const cidade_limpa = sanitizeCity(cidade); // Usa a função sanitizeCity para limpar acentos
       
-      // console.log(`[DEBUG] CNAE Recebido: ${cnae_str}`);
-      // console.log(`[DEBUG] Cidade Recebida Sanitizada: ${cidade_limpa}`);
-
       // Regra 0: Fora do Estado de SP
       if (uf.toUpperCase() !== "SP") {
           return "Fora de SP – Não podemos associar.";
@@ -383,6 +380,7 @@
         return;
     }
 
+    // Campos com 'readonly' serão incluídos no FormData, solucionando o problema.
     const dados = {};
     const formData = new FormData(form);
     for (let [key, value] of formData.entries()) {
@@ -441,14 +439,15 @@
     // DADOS DA EMPRESA
     // =========================================================================
     pdf.setFontSize(12);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (negrito)
+    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("DADOS DA EMPRESA", padding, y);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (normal)
+    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
     pdf.setFontSize(10);
+    // Campos agora preenchidos corretamente:
     pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 5;
     pdf.text(`CNPJ: ${dados.cnpj || ''}`, padding, y); y += 5;
     pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 5;
@@ -457,10 +456,10 @@
     pdf.text(`RAMO DE ATIVIDADE (CNAE): ${cnae_fiscal || 'N/A'}`, padding, y); y += 8;
 
     // Serviços de Interesse
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (negrito)
+    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("SERVIÇOS DE INTERESSE:", padding, y);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (normal)
+    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 5;
     const servicosText = (dados.servicos_interesse || []).map(s => s.split(' - ')[1] || s).join(', ');
@@ -470,27 +469,29 @@
     // PLANO SUGERIDO E PAGAMENTO - DESTAQUE
     // =========================================================================
     pdf.setFontSize(12);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (negrito)
+    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("PLANO SUGERIDO", padding, y);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (normal)
+    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
     pdf.setFontSize(10);
+    // Campo agora preenchido corretamente:
     pdf.text(`PLANO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, padding, y); y += 5;
     pdf.text(`ASSOCIAÇÃO: ${dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP"}`, padding, y); y += 8;
 
     pdf.setFontSize(12);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (negrito)
+    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("FORMA DE PAGAMENTO", padding, y);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (normal)
+    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
     pdf.setFontSize(10);
     pdf.text(`MODALIDADE: ${dados.forma_pagamento.toUpperCase()}`, padding, y); y += 5;
+    // Campo agora preenchido corretamente:
     pdf.text(`VALOR TOTAL (ANUIDADE PROPORCIONAL): ${valorTotal}`, padding, y); y += 8;
 
     // OBSERVAÇÕES
@@ -502,10 +503,10 @@
     // DADOS DO SÓCIO/RODAPÉ
     // =========================================================================
     pdf.setFontSize(12);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (negrito)
+    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", padding, y);
-    // CORREÇÃO: Altera para o formato correto de definição de estilo de fonte (normal)
+    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     

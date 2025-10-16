@@ -19,10 +19,10 @@
       <input type="text" name="cnpj" placeholder="Somente números" maxlength="14">
 
       <label>Razão Social</label>
-            <input type="text" name="razao" required readonly>
+            <input type="text" name="razao" required readonly>
 
       <label>Endereço</label>
-            <input type="text" name="endereco" readonly>
+            <input type="text" name="endereco" readonly>
 
       <label>E-mail</label>
       <input type="email" name="email" placeholder="contato@empresa.com" required>
@@ -35,7 +35,7 @@
       </div>
 
       <label>Plano Sugerido</label>
-            <input type="text" name="plano" readonly>
+            <input type="text" name="plano" readonly>
       <p id="plano-info"></p>
 
       <label>Sócio/Responsável</label>
@@ -164,9 +164,9 @@
 
   // Funções de Segmentação
   function segmentar(cnae, cidade, uf) {
-      // CORREÇÃO: Garante que cnae é uma string, resolvendo o erro 'cnae.trim is not a function'
+      // Garante que cnae é uma string
       const cnae_str = String(cnae || '').trim();
-      const cidade_limpa = sanitizeCity(cidade); // Usa a função sanitizeCity para limpar acentos
+      const cidade_limpa = sanitizeCity(cidade); 
       
       // Regra 0: Fora do Estado de SP
       if (uf.toUpperCase() !== "SP") {
@@ -213,18 +213,26 @@
     } else if (plano === "Prata Aescon") {
         tabela = prata_aescon_pricing;
     } else {
-        return { valor_a_vista: "N/A", valor_parcelado: "N/A", valor_a_vista_raw: "N/A" };
+        return { valor_a_vista: "N/A", valor_parcelado: "N/A", valor_a_vista_raw: "N/A", parcelas: "N/A", valor_parcela: "N/A", total: "N/A" };
     }
+
     const valores = tabela[mesAtual] || {};
+    
+    // Formata para exibição
     const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
-    const parcelas = valores.parcelas;
     const valorParcela = valores.valor_parcela ? `R$ ${valores.valor_parcela.toFixed(2).replace('.', ',')}` : "N/A";
-    const valorParcelado = parcelas && valorParcela ? `R$ ${valores.total.toFixed(2).replace('.', ',')} em ${parcelas}x de ${valorParcela}` : "N/A";
+    const valorTotalParcelado = valores.total ? `R$ ${valores.total.toFixed(2).replace('.', ',')}` : "N/A";
+    const parcelas = valores.parcelas;
+
+    const valorParceladoDisplay = parcelas && valorParcela ? `${parcelas}x de ${valorParcela} (Total: ${valorTotalParcelado})` : "N/A";
 
     return {
         valor_a_vista: aVista,
-        valor_parcelado: valorParcelado,
-        valor_a_vista_raw: valores.a_vista // Usado para cálculo posterior se necessário
+        valor_parcelado: valorParceladoDisplay,
+        valor_a_vista_raw: valores.a_vista,
+        total: valorTotalParcelado, // Novo campo para facilitar a lógica do PDF
+        valor_parcela: valorParcela,
+        parcelas: parcelas
     };
   }
 
@@ -400,30 +408,27 @@
     let y = 20;
     const padding = 10;
     
-    // Obter dados de preço para o mês atual
+    // Obter dados de preço e plano formatados
     const planoInfoData = getPlanoInfo(dados.plano);
-    const mesAtual = new Date().getMonth() + 1;
-    let tabelaPreco = {};
-    if (dados.plano === "Plano Prata") tabelaPreco = prata_pricing;
-    else if (dados.plano === "Plano Ouro Premium") tabelaPreco = ouro_premium_pricing;
-    else if (dados.plano === "Prata Aescon") tabelaPreco = prata_aescon_pricing;
 
-    const valoresMes = tabelaPreco[mesAtual] || {};
-    let valorTotal = "N/A";
+    let valorAnuidade;
+    let detalhesPagamento;
 
     if (dados.forma_pagamento === "À vista") {
-        valorTotal = planoInfoData.valor_a_vista;
-    } else if (valoresMes.total) {
-        valorTotal = `R$ ${valoresMes.total.toFixed(2).replace('.', ',')}`;
+        valorAnuidade = planoInfoData.valor_a_vista;
+        detalhesPagamento = `Modalidade: À VISTA`;
+    } else {
+        valorAnuidade = planoInfoData.total;
+        detalhesPagamento = `Modalidade: PARCELADO em ${planoInfoData.parcelas}x de ${planoInfoData.valor_parcela}`;
     }
 
+    const associacao = dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP";
+
+
     // =========================================================================
-    // CORREÇÃO E INCLUSÃO DO LOGO E CABEÇALHO
+    // CABEÇALHO E LOGO
     // =========================================================================
-    
-    // Usamos o Base64 embedado (SESCON_LOGO_BASE64) ao invés do caminho do arquivo
     try {
-        // pdf.addImage(data, format, x, y, width, height)
         pdf.addImage(SESCON_LOGO_BASE64, 'PNG', 150, 10, 50, 15);
         y = 30; // Ajusta o ponto de partida do texto
     } catch (e) {
@@ -439,15 +444,12 @@
     // DADOS DA EMPRESA
     // =========================================================================
     pdf.setFontSize(12);
-    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("DADOS DA EMPRESA", padding, y);
-    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
     pdf.setFontSize(10);
-    // Campos agora preenchidos corretamente:
     pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 5;
     pdf.text(`CNPJ: ${dados.cnpj || ''}`, padding, y); y += 5;
     pdf.text(`ENDEREÇO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 5;
@@ -455,58 +457,48 @@
     pdf.text(`TELEFONE: ${dados.telefone || ''}`, padding, y); y += 5;
     pdf.text(`RAMO DE ATIVIDADE (CNAE): ${cnae_fiscal || 'N/A'}`, padding, y); y += 8;
 
-    // Serviços de Interesse
-    // CORREÇÃO: Usando a forma correta para negrito
-    pdf.setFont('helvetica', 'bold'); 
-    pdf.text("SERVIÇOS DE INTERESSE:", padding, y);
-    // CORREÇÃO: Usando a forma correta para normal
-    pdf.setFont('helvetica', 'normal'); 
-    y += 5;
-    const servicosText = (dados.servicos_interesse || []).map(s => s.split(' - ')[1] || s).join(', ');
-    pdf.text(servicosText, padding + 5, y); y += 10;
-    
     // =========================================================================
     // PLANO SUGERIDO E PAGAMENTO - DESTAQUE
     // =========================================================================
     pdf.setFontSize(12);
-    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
-    pdf.text("PLANO SUGERIDO", padding, y);
-    // CORREÇÃO: Usando a forma correta para normal
+    pdf.text("PLANO E VALORES (ANUIDADE PROPORCIONAL)", padding, y);
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
     pdf.setFontSize(10);
-    // Campo agora preenchido corretamente:
     pdf.text(`PLANO: ${dados.plano ? dados.plano.toUpperCase() : ''}`, padding, y); y += 5;
-    pdf.text(`ASSOCIAÇÃO: ${dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP"}`, padding, y); y += 8;
+    pdf.text(`ASSOCIAÇÃO: ${associacao}`, padding, y); y += 5;
+    pdf.text(`VALOR TOTAL (ANUIDADE PROPORCIONAL): ${valorAnuidade}`, padding, y); y += 5;
+    pdf.text(`CONDIÇÃO DE PAGAMENTO: ${detalhesPagamento}`, padding, y); y += 8;
 
-    pdf.setFontSize(12);
-    // CORREÇÃO: Usando a forma correta para negrito
-    pdf.setFont('helvetica', 'bold'); 
-    pdf.text("FORMA DE PAGAMENTO", padding, y);
-    // CORREÇÃO: Usando a forma correta para normal
-    pdf.setFont('helvetica', 'normal'); 
-    y += 8;
-    
-    pdf.setFontSize(10);
-    pdf.text(`MODALIDADE: ${dados.forma_pagamento.toUpperCase()}`, padding, y); y += 5;
-    // Campo agora preenchido corretamente:
-    pdf.text(`VALOR TOTAL (ANUIDADE PROPORCIONAL): ${valorTotal}`, padding, y); y += 8;
-
-    // OBSERVAÇÕES
+    // OBSERVAÇÕES DE ANUIDADE
     pdf.setFontSize(8);
-    pdf.text("A anuidade informada refere-se ao valor proporcional aos meses restantes do ano corrente.", padding, y); y += 4;
+    pdf.text("A anuidade informada refere-se ao valor PROPORCIONAL aos meses restantes do ano corrente.", padding, y); y += 4;
     pdf.text("No próximo ciclo de renovação, o valor será referente à anuidade integral.", padding, y); y += 10;
+    
+    // =========================================================================
+    // SERVIÇOS DE INTERESSE
+    // =========================================================================
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold'); 
+    pdf.text("SERVIÇOS DE INTERESSE:", padding, y);
+    pdf.setFont('helvetica', 'normal'); 
+    y += 5;
+    pdf.setFontSize(10);
+    const servicosText = (dados.servicos_interesse || []).map(s => s.split(' - ')[1] || s).join(', ');
+    // Usamos o text() com quebra de linha automática (maximo 180mm de largura)
+    const splitText = pdf.splitTextToSize(servicosText, 180); 
+    pdf.text(splitText, padding + 5, y); 
+    y += splitText.length * 5 + 5; // Ajusta 'y' com base no número de linhas
+
     
     // =========================================================================
     // DADOS DO SÓCIO/RODAPÉ
     // =========================================================================
     pdf.setFontSize(12);
-    // CORREÇÃO: Usando a forma correta para negrito
     pdf.setFont('helvetica', 'bold'); 
     pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", padding, y);
-    // CORREÇÃO: Usando a forma correta para normal
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
@@ -528,7 +520,7 @@
     pdf.text("________________________________", padding, y); y += 6;
     pdf.text("ASSINATURA DO SÓCIO DA EMPRESA", padding, y);
 
-    // Geração do arquivo (CORREÇÃO DO ERRO 'replace' AQUI)
+    // Geração do arquivo
     const nomeArquivo = `Ficha_Inscricao_${(dados.razao || '').replace(/[^a-zA-Z0-9]/g, '_')}_${dados.cnpj.replace(/\D/g, '')}.pdf`;
     const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);

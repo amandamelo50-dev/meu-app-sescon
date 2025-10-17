@@ -38,26 +38,14 @@
         <option value="Email">E-mail</option>
       </select>
 
-            <label>Segmento de Atuação da Empresa</label>
+            <label>Ramo de Atividade/Categoria Representada</label>
       <select name="segmento" required>
-        <option value="">Selecione o Segmento</option>
+        <option value="">Selecione a Categoria</option>
       </select>
 
-      <label>Plano Sugerido</label>
-      <input type="text" name="plano" required>
+            <label>Plano Sugerido (Preenchimento Automático)</label>
+      <input type="text" name="plano" required readonly disabled>
       <p id="plano-info" style="font-size: 0.9em;"></p>
-
-            <label>A empresa possui registro ativo no CRC?</label>
-      <select id="crc_empresa_select" name="crc_empresa" required>
-        <option value="">Selecione</option>
-        <option value="Sim">Sim</option>
-        <option value="Não">Não</option>
-      </select>
-      <div id="crc_empresa_container" style="display:none; margin-top: 10px;">
-        <label>Número(s) de Registro do CRC da Empresa</label>
-        <input type="text" name="crc_empresa_numero" placeholder="Ex: SP-012345/O-0 (opcional se 'Sim')">
-      </div>
-
 
             <label>Serviços de Interesse (Selecione todos que se aplicam)</label>
       <div id="servicos-interesse-container" class="checkbox-group">
@@ -138,7 +126,7 @@
   let cnpjFormatadoGlobal = ''; 
 
   // --------------------------------------------------------------------------------
-  // 1. LISTA DE SERVIÇOS E SEGMENTOS
+  // 1. LISTA DE SERVIÇOS E SEGMENTOS (ATUALIZADA)
   // --------------------------------------------------------------------------------
   const listaServicos = [
     { id: '343', nome: 'CENTRAL DE SERVIÇOS' },
@@ -165,14 +153,64 @@
     { id: '158', nome: 'SOCIETÁRIO E LEGAL' },
   ];
 
-  // Lista de Segmentos para o novo Select
+  // Lista de Segmentos ATUALIZADA - 56 Categorias Representadas
   const listaSegmentos = [
-    'SERVIÇOS CONTÁBEIS',
-    'SERVIÇOS JURÍDICOS',
-    'SERVIÇOS FINANCEIROS',
-    'SERVIÇOS DE TECNOLOGIA',
-    'SERVIÇOS DE BPO',
-    'OUTROS',
+    'Atividade de apoio à produção florestal',
+    'Serviços de reboque de veículos',
+    'Outras atividades auxiliares dos transportes terrestres não especificadas anteriormente',
+    'Operação dos aeroportos e campos de aterrissagem',
+    'Organização logística do transporte de carga',
+    'Operador de transporte multimodal – OTM',
+    'Holdings de instituições financeiras',
+    'Holdings de instituições não-financeiras',
+    'Outras sociedades de participação, exceto holdings',
+    'Bolsa de valores',
+    'Bolsa de mercadorias',
+    'Bolsa de mercadorias e futuros',
+    'Administração de mercados de balcão organizados',
+    'Agentes de investimentos em aplicações financeiras',
+    'Administração de cartões de crédito',
+    'Correspondêntes de instituições financeiras',
+    'Representação de bancos estrangeiros',
+    'Outras atividades auxiliares dos serviços financeiros não especificadas anteriormente',
+    'Peritos e avaliadores de seguros',
+    'Auditoria e consultoria atuarial',
+    'Atividades auxiliares dos seguros, da previdência complementar e dos planos de saúde não especificadas anteriormente',
+    'Atividades de administração de fundos por contrato ou comissão',
+    'Atividades auxiliares da justiça: arbitragem, mediação, avaliações perícia.',
+    'Agente de propriedade industrial',
+    'Atividades de contabilidade',
+    'Atividades de consultoria e auditoria contábil e tributária',
+    'Atividades de consultoria em gestão empresarial, exceto consultoria técnica específica',
+    'Serviços de cartografia, topografia e geodésia',
+    'Atividades de estudos geológicos (prospecção geológica)',
+    'Serviços de desenho técnico relacionados à arquitetura e engenharia',
+    'Serviços de perícia técnica relacionados à segurança do trabalho',
+    'Testes e análises técnicas ( ensaios de materiais e produtos , análise de qualidade )',
+    'Pesquisa e desenvolvimento experimental em ciências físicas e naturais',
+    'Pesquisa e desenvolvimento experimental em ciências sociais e humanas',
+    'Promoção de Vendas',
+    'Consultoria em publicidade',
+    'Pesquisa de mercado e de opinião pública',
+    'Atividades de produção de fotografias aéreas e submarinas',
+    'Serviços de microfilmagem',
+    'Serviços de Tradução, Interpretação e Similares',
+    'Serviços de agronomia e de consultoria e de atividades agrícolas e pecuárias',
+    'Atividades de intermediação e agenciamento de serviços e negócios em geral, exceto imobiliários',
+    'Agenciamento de profissionais para atividades esportivas, culturais e artísticas',
+    'Outras atividades profissionais, científicas e técnicas não especificadas anteriormente',
+    'Atividades de monitoramento de sistemas de segurança',
+    'Serviços combinados de escritório e apoio administrativo',
+    'Preparação de documentos e serviços especializados de apoio administrativo não especificados anteriormente.',
+    'Outras atividades de serviços prestados principalmente às empresas não especificadas anteriormente',
+    'Atividades de apoio à educação, exceto caixas escolares',
+    'Treinamento em desenvolvimento profissional e gerencial',
+    'Atividades de apoio a gestão de saúde (exceto serviços privativos de médicos)',
+    'Atividades de organizações associativas patronais e empresariais',
+    'Atividades de organizações associativas profissionais',
+    'Atividades de associações de defesa de direitos sociais',
+    'Atividades de organizações religiosas',
+    'Atividades associativas não especificadas anteriormente'
   ];
   
   function renderizarServicos() {
@@ -326,10 +364,18 @@
   let drawing = false;
   let lastX = 0, lastY = 0;
 
-
-  // Lógica de Assinatura (mantida)
-  function drawLine(x1, y1, x2, y2) { /* ... */ }
-  // ... (Eventos de mouse/touch para Assinatura) ...
+  // Lógica de Assinatura (AGORA CORRIGIDA)
+  function drawLine(x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.closePath();
+  }
+  
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const rect = canvas.getBoundingClientRect();
@@ -453,19 +499,7 @@
     }
   });
   
-  // Lógica condicional para CRC da Empresa
-  document.getElementById('crc_empresa_select').addEventListener('change', function() {
-    const container = document.getElementById('crc_empresa_container');
-    if (this.value === 'Sim') {
-      container.style.display = 'block';
-    } else {
-      container.style.display = 'none';
-      // Limpa o valor para não ir para o PDF se for 'Não'
-      document.querySelector('input[name="crc_empresa_numero"]').value = '';
-    }
-  });
-
-  // Lógica condicional para CRC do Sócio
+  // Lógica condicional para CRC do Sócio (mantida)
   document.getElementById('crc_socio_select').addEventListener('change', function() {
     const container = document.getElementById('crc_socio_container');
     if (this.value === 'Sim') {
@@ -499,7 +533,9 @@
 
   // Garante que o botão só habilita se o formulário for válido
   form.addEventListener('change', () => {
-    if (form.checkValidity() && !planoInput.value.includes('Fora') && !planoInput.value.includes('CNAE fora')) {
+    // Verifica se o campo plano (automático) foi preenchido e não contém erros
+    const planoValido = planoInput.value && !planoInput.value.includes('Fora') && !planoInput.value.includes('CNAE fora');
+    if (form.checkValidity() && planoValido) {
       sendBtn.disabled = false;
     } else {
       sendBtn.disabled = true;
@@ -508,7 +544,7 @@
 
 
   // --------------------------------------------------------------------------------
-  // 4. GERAÇÃO DO PDF (AJUSTADA)
+  // 4. GERAÇÃO DO PDF 
   // --------------------------------------------------------------------------------
 
   form.addEventListener("submit", async (ev) => {
@@ -587,16 +623,9 @@
     pdf.text(`TELEFONE/WHATSAPP PRINCIPAL: ${dados.telefone || ''}`, padding, y); y += 5;
     pdf.text(`CONTATO PREFERENCIAL: ${dados.contato_preferencial.toUpperCase()}`, padding, y); y += 5;
     // Segmento de Atuação (Select)
-    pdf.text(`SEGMENTO DE ATUAÇÃO: ${dados.segmento.toUpperCase()}`, padding, y); y += 5; 
-    pdf.text(`RAMO DE ATIVIDADE (CNAE Principal): ${cnaeGlobal || 'N/A'}`, padding, y); y += 5;
+    pdf.text(`RAMO DE ATIVIDADE/CATEGORIA REPRESENTADA: ${dados.segmento.toUpperCase()}`, padding, y); y += 5; 
+    pdf.text(`CNAE PRINCIPAL (Receita Federal): ${cnaeGlobal || 'N/A'}`, padding, y); y += 8;
     
-    let crcEmpresaTexto = `EMPRESA POSSUI REGISTRO NO CRC? ${dados.crc_empresa.toUpperCase()}`;
-    if (dados.crc_empresa === 'Sim' && dados.crc_empresa_numero) {
-      crcEmpresaTexto += ` (Número(s): ${dados.crc_empresa_numero.toUpperCase()})`;
-    }
-    pdf.text(crcEmpresaTexto, padding, y); y += 8;
-
-
     // =========================================================================
     // PLANO SUGERIDO E PAGAMENTO - DESTAQUE
     // =========================================================================
@@ -662,6 +691,7 @@
       pdf.setFontSize(10);
       pdf.text(`NOME DO PREENCHEDOR: ${dados.nome_preenchedor.toUpperCase()}`, padding, y); y += 5;
       pdf.text(`CPF DO PREENCHEDOR: ${dados.cpf_preenchedor || ''}`, padding, y); y += 5;
+      // OBS: O sócio está ciente, conforme checkbox e texto acima.
     }
 
     // Rodapé de Dados

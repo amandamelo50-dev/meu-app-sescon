@@ -66,9 +66,9 @@
                     Ao enviar, você declara que o sócio/responsável legal listado acima concorda com os termos de associação.
                 </p>
                 <label>Nome Completo do Preenchedor</label>
-                <input type="text" name="nome_preenchedor" required>
+                <input type="text" name="nome_preenchedor"> 
                 <label>CPF do Preenchedor</label>
-                <input type="text" name="cpf_preenchedor" placeholder="Somente 11 dígitos" required>
+                <input type="text" name="cpf_preenchedor" placeholder="Somente 11 dígitos">
             </div>
 
             <label>CPF do Sócio</label>
@@ -118,7 +118,7 @@
     window.jsPDF = window.jspdf.jsPDF;
 
     // Dados da imagem do logo em Base64
-    const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgHf99e8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLdbefsDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
+    const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
 
     // Armazenar o CNPJ formatado (com pontos) para uso no PDF
     let cnpjFormatadoGlobal = ''; 
@@ -241,6 +241,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         renderizarServicos();
         renderizarSegmentos();
+        // Garante que a lógica condicional é executada no carregamento
+        // para configurar corretamente os campos do preenchedor
+        updatePreenchedorFields(document.getElementById('sou_socio_checkbox').checked);
+        checkFormValidity();
     });
 
 
@@ -350,9 +354,8 @@
     function getFirstInvalidField() {
         const requiredElements = form.querySelectorAll('[required]');
         for (const element of requiredElements) {
-            // Verifica se o elemento está visível e inválido
-            const isHidden = element.closest('#preenchedor_container') && element.closest('#preenchedor_container').style.display === 'none';
-            if (element.required && !isHidden && !element.checkValidity()) {
+            // Verifica se o elemento está visível e inválido (excluindo os que estão hidden, mesmo que por CSS)
+            if (element.required && !element.checkValidity()) {
                 // Tenta pegar o texto do label ou retorna o nome do campo
                 return element.labels && element.labels.length > 0 ? element.labels[0].textContent.trim() : element.name;
             }
@@ -380,16 +383,20 @@
     let drawing = false;
     let lastX = 0, lastY = 0;
     let hasSigned = false; // Flag para a assinatura
-    
+    const nomePreenchedor = document.querySelector('input[name="nome_preenchedor"]');
+    const cpfPreenchedor = document.querySelector('input[name="cpf_preenchedor"]');
+    const preenchedorContainer = document.getElementById('preenchedor_container');
+
     // OTIMIZAÇÃO: Novo nome para a função de validação
     function checkFormValidity() {
         const planoSugerido = planoInput.value;
-        const isFormValid = form.checkValidity();
+        // O form.checkValidity() agora é seguro porque os campos do preenchedor
+        // têm o atributo 'required' removido quando estão escondidos.
+        const isFormValid = form.checkValidity(); 
         const isSigned = hasSigned; 
         
-        // 1. Verifica a elegibilidade do Plano
+        // 1. Verifica a elegibilidade do Plano (CNPJ e Região)
         if (!planoSugerido || planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora')) {
-            // Se o CNPJ não foi buscado ou é inválido, o botão fica inativo
             if (cnpjInput.value.length === 14 && razaoInput.value === '') {
                  planoInfo.innerHTML = '';
                  sendBtn.disabled = true;
@@ -402,7 +409,7 @@
                  return; 
             }
             planoInfo.innerHTML = '';
-            sendBtn.disabled = true; // Mantém desabilitado se CNPJ não foi carregado
+            sendBtn.disabled = true; 
             resultDiv.textContent = 'Digite 14 dígitos do CNPJ para buscar os dados.';
             return;
         } 
@@ -591,24 +598,26 @@
         checkFormValidity();
     });
 
-    // Lógica condicional para Preenchedor (Não Sócio)
-    document.getElementById('sou_socio_checkbox').addEventListener('change', function() {
-        const container = document.getElementById('preenchedor_container');
-        const nomePreenchedor = document.querySelector('input[name="nome_preenchedor"]');
-        const cpfPreenchedor = document.querySelector('input[name="cpf_preenchedor"]');
-
-        if (!this.checked) {
-            container.style.display = 'block';
-            nomePreenchedor.required = true;
-            cpfPreenchedor.required = true;
+    // Função para atualizar o estado dos campos do preenchedor
+    function updatePreenchedorFields(isSocio) {
+        if (!isSocio) {
+            preenchedorContainer.style.display = 'block';
+            nomePreenchedor.setAttribute('required', 'required'); // Adiciona required
+            cpfPreenchedor.setAttribute('required', 'required'); // Adiciona required
         } else {
-            container.style.display = 'none';
-            nomePreenchedor.required = false;
-            cpfPreenchedor.required = false;
-            // Limpa os valores para não serem enviados
+            preenchedorContainer.style.display = 'none';
+            nomePreenchedor.removeAttribute('required'); // Remove required
+            cpfPreenchedor.removeAttribute('required'); // Remove required
+            // Limpa os valores para não serem enviados e não causarem falha de validação oculta
             nomePreenchedor.value = '';
             cpfPreenchedor.value = '';
         }
+    }
+    
+    // Lógica condicional para Preenchedor (Não Sócio)
+    document.getElementById('sou_socio_checkbox').addEventListener('change', function() {
+        // CORREÇÃO: Chama a função dedicada
+        updatePreenchedorFields(this.checked);
         // Força a revalidação do formulário
         checkFormValidity();
     });
@@ -757,7 +766,7 @@
         pdf.text(crcSocioTexto, padding, y); y += 5;
 
         // Dados de quem preencheu (se for diferente)
-        if (dados.nome_preenchedor) {
+        if (dados.nome_preenchedor && dados.nome_preenchedor.trim() !== "") {
             pdf.setFontSize(12);
             pdf.setFont('helvetica', 'bold'); 
             pdf.text("DADOS DE QUEM PREENCHEU ESTE FORMULÁRIO", padding, y);

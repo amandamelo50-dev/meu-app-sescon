@@ -21,7 +21,7 @@
       <input type="text" name="razao" required readonly>
 
       <label>Endereço Completo (Rua, Número, Complemento, Bairro, Cidade/UF, CEP)</label>
-      <input type="text" name="endereco" readonly>
+            <input type="text" name="endereco" readonly> 
 
       <label>E-mail</label>
       <input type="email" name="email" placeholder="contato@empresa.com" required>
@@ -42,7 +42,7 @@
       </select>
 
             <label>Plano Sugerido (Preenchimento Automático)</label>
-            <input type="text" name="plano" required readonly> 
+      <input type="text" name="plano" required readonly> 
       <p id="plano-info" style="font-size: 0.9em;"></p>
 
             <label>Serviços de Interesse (Selecione todos que se aplicam)</label>
@@ -110,7 +110,7 @@
       <button type="submit" id="sendBtn" disabled>Gerar PDF</button>
     </form>
 
-    <div id="result" style="margin-top:20px;"></div>
+        <div id="result" style="margin-top:20px;"></div>
     <a id="downloadLink" style="display:none">📥 Baixar PDF</a>
   </div>
 
@@ -118,7 +118,7 @@
   window.jsPDF = window.jspdf.jsPDF;
 
   // Dados da imagem do logo em Base64
-  const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+dM+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgHf99e8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLdbefsDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
+  const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgHf99e8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLdbefsDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
 
   // Armazenar o CNPJ formatado (com pontos) para uso no PDF
   let cnpjFormatadoGlobal = ''; 
@@ -345,6 +345,20 @@
         parcelas: parcelas
     };
   }
+  
+  // Função para identificar o primeiro campo inválido
+  function getFirstInvalidField() {
+      const requiredElements = form.querySelectorAll('[required]');
+      for (const element of requiredElements) {
+          // Verifica se o elemento está visível e inválido
+          const isHidden = element.closest('#preenchedor_container') && element.closest('#preenchedor_container').style.display === 'none';
+          if (element.required && !isHidden && !element.checkValidity()) {
+              // Tenta pegar o texto do label ou retorna o nome do campo
+              return element.labels && element.labels.length > 0 ? element.labels[0].textContent.trim() : element.name;
+          }
+      }
+      return null;
+  }
 
 
   // --------------------------------------------------------------------------------
@@ -365,8 +379,9 @@
   const ctx = canvas.getContext("2d");
   let drawing = false;
   let lastX = 0, lastY = 0;
+  let hasSigned = false; // Flag para a assinatura
 
-  // Lógica de Assinatura (AGORA CORRIGIDA)
+  // Lógica de Assinatura
   function drawLine(x1, y1, x2, y2) {
     ctx.beginPath();
     ctx.strokeStyle = 'black';
@@ -380,6 +395,7 @@
   
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
+    hasSigned = true; // Marca que o usuário começou a desenhar
     const rect = canvas.getBoundingClientRect();
     lastX = e.clientX - rect.left;
     lastY = e.clientY - rect.top;
@@ -393,11 +409,17 @@
     lastX = x;
     lastY = y;
   });
-  canvas.addEventListener("mouseup", () => drawing = false);
+  canvas.addEventListener("mouseup", () => {
+    drawing = false;
+    atualizarPlanoInfo(); // Revalida após soltar o mouse (fim da assinatura)
+  });
   canvas.addEventListener("mouseout", () => drawing = false);
+  
+  // Touch events
   canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
     drawing = true;
+    hasSigned = true; // Marca que o usuário começou a desenhar
     const rect = canvas.getBoundingClientRect();
     const t = e.touches[0];
     lastX = t.clientX - rect.left;
@@ -414,23 +436,59 @@
     lastX = x;
     lastY = y;
   }, { passive: false });
-  canvas.addEventListener("touchend", () => drawing = false);
+  canvas.addEventListener("touchend", () => {
+    drawing = false;
+    atualizarPlanoInfo(); // Revalida após o toque terminar
+  });
+  
   document.getElementById("clearBtn").addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasSigned = false; // Reseta a flag
+    atualizarPlanoInfo(); // Revalida após limpar
   });
 
 
-  // Função auxiliar para atualizar a info do plano
+  // Função auxiliar para atualizar a info do plano E a validação do botão
   function atualizarPlanoInfo() {
     const planoSugerido = planoInput.value;
+    
+    // 1. Verifica a elegibilidade do Plano
     if (!planoSugerido || planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora')) {
       planoInfo.innerHTML = `<span style="color:red;font-weight:bold;">${planoSugerido || 'N/A'}</span>`;
       sendBtn.disabled = true;
+      resultDiv.textContent = '❌ CNPJ não elegível ou fora da região. Verifique o campo "Plano Sugerido".';
+      return; // Para a execução se o plano for inválido
+    } 
+    
+    // Se o plano for válido, mostra os valores
+    const planoInfoData = getPlanoInfo(planoSugerido);
+    planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
+
+    // 2. Verifica a validade do Formulário (todos os campos 'required')
+    const isFormValid = form.checkValidity();
+    
+    // 3. Verifica a Assinatura (além do formulário)
+    const isSigned = hasSigned; 
+
+    sendBtn.disabled = !(isFormValid && isSigned);
+
+    // 4. Atualiza o Feedback para o usuário
+    if (sendBtn.disabled) {
+        // Prioriza o feedback da assinatura se o form estiver OK
+        if (isFormValid && !isSigned) {
+          resultDiv.innerHTML = '⚠️ Por favor, faça a **Assinatura** no quadro acima para liberar o botão.';
+        } else if (!isFormValid) {
+          // Caso contrário, busca o primeiro campo faltando
+          const firstMissing = getFirstInvalidField();
+          if (firstMissing) {
+              resultDiv.innerHTML = `⚠️ Preencha o campo obrigatório: **"${firstMissing}"** para habilitar o PDF.`;
+          } else {
+              // Caso o form.checkValidity falhe por motivos desconhecidos (ex: campo required hidden que não deveria)
+              resultDiv.textContent = `⚠️ Verifique todos os campos obrigatórios (marcados com *).`;
+          }
+        }
     } else {
-      const planoInfoData = getPlanoInfo(planoSugerido);
-      planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
-      // Verifica se todos os campos estão válidos, incluindo o plano recém-preenchido.
-      sendBtn.disabled = !form.checkValidity();
+        resultDiv.textContent = '✅ Todos os campos obrigatórios preenchidos! Clique em "Gerar PDF" para finalizar.';
     }
   }
 
@@ -491,19 +549,22 @@
           razaoInput.value = '';
           enderecoInput.value = '';
           cnpjFormatadoGlobal = '';
+          atualizarPlanoInfo(); // Revalida com o erro
         }
       } catch (error) {
         resultDiv.textContent = `❌ Erro na requisição: ${error.message}. Verifique sua conexão.`;
         sendBtn.disabled = true;
+        atualizarPlanoInfo(); // Revalida com o erro
       }
     } else {
       resultDiv.textContent = 'Digite 14 dígitos do CNPJ para buscar os dados.';
       sendBtn.disabled = true;
       cnpjFormatadoGlobal = '';
+      atualizarPlanoInfo(); // Revalida
     }
   });
   
-  // Lógica condicional para CRC do Sócio (mantida)
+  // Lógica condicional para CRC do Sócio
   document.getElementById('crc_socio_select').addEventListener('change', function() {
     const container = document.getElementById('crc_socio_container');
     if (this.value === 'Sim') {
@@ -539,12 +600,8 @@
     atualizarPlanoInfo();
   });
 
-  // Garante que o botão só habilita se o formulário for válido (para mudanças manuais)
-  form.addEventListener('change', () => {
-    // A lógica de revalidação já está dentro de atualizarPlanoInfo. 
-    // Basta chamá-la.
-    atualizarPlanoInfo();
-  });
+  // Garante que o botão só habilita se o formulário for válido (para mudanças manuais nos campos)
+  form.addEventListener('change', atualizarPlanoInfo);
 
 
   // --------------------------------------------------------------------------------
@@ -555,8 +612,9 @@
     ev.preventDefault();
     resultDiv.textContent = 'Gerando PDF...';
 
-    if (sendBtn.disabled || !form.checkValidity()) {
-        resultDiv.textContent = '❌ Preencha todos os campos obrigatórios corretamente e verifique a elegibilidade do CNPJ.';
+    // Revalidação final antes de gerar o PDF
+    if (sendBtn.disabled || !form.checkValidity() || !hasSigned) {
+        resultDiv.innerHTML = '❌ Preencha todos os campos obrigatórios, assine e verifique a elegibilidade do CNPJ.';
         return;
     }
 

@@ -42,7 +42,7 @@
       </select>
 
             <label>Plano Sugerido (Preenchimento Automático)</label>
-      <input type="text" name="plano" required readonly disabled>
+            <input type="text" name="plano" required readonly> 
       <p id="plano-info" style="font-size: 0.9em;"></p>
 
             <label>Serviços de Interesse (Selecione todos que se aplicam)</label>
@@ -429,10 +429,12 @@
     } else {
       const planoInfoData = getPlanoInfo(planoSugerido);
       planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
+      // Verifica se todos os campos estão válidos, incluindo o plano recém-preenchido.
       sendBtn.disabled = !form.checkValidity();
     }
   }
 
+  // Chama a atualização quando o plano é alterado (automaticamente)
   planoInput.addEventListener('input', atualizarPlanoInfo);
 
   // Evento de CNPJ
@@ -511,6 +513,8 @@
       // Limpa o valor para não ir para o PDF se for 'Não'
       document.querySelector('input[name="crc_socio_numero"]').value = '';
     }
+    // Força a revalidação do formulário
+    atualizarPlanoInfo();
   });
 
   // Lógica condicional para Preenchedor (Não Sócio)
@@ -531,17 +535,15 @@
       nomePreenchedor.value = '';
       cpfPreenchedor.value = '';
     }
+    // Força a revalidação do formulário
+    atualizarPlanoInfo();
   });
 
-  // Garante que o botão só habilita se o formulário for válido
+  // Garante que o botão só habilita se o formulário for válido (para mudanças manuais)
   form.addEventListener('change', () => {
-    // Verifica se o campo plano (automático) foi preenchido e não contém erros
-    const planoValido = planoInput.value && !planoInput.value.includes('Fora') && !planoInput.value.includes('CNAE fora');
-    if (form.checkValidity() && planoValido) {
-      sendBtn.disabled = false;
-    } else {
-      sendBtn.disabled = true;
-    }
+    // A lógica de revalidação já está dentro de atualizarPlanoInfo. 
+    // Basta chamá-la.
+    atualizarPlanoInfo();
   });
 
 

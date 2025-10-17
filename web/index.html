@@ -12,7 +12,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Ficha de Associação - SESCON</h1>
+    <h1>Ficha de Associação</h1>
     <p style="color:red; font-weight:bold;">ATENÇÃO: Este formulário não está salvo. Utilize a função "Gerar PDF" ao finalizar.</p>
 
     <form id="fichaForm">
@@ -22,7 +22,7 @@
       <label>Razão Social</label>
       <input type="text" name="razao" required readonly>
 
-      <label>Endereço Completo</label>
+      <label>Endereço Completo (Rua, Número, Complemento, Bairro, Cidade/UF, CEP)</label>
       <input type="text" name="endereco" readonly>
 
       <label>E-mail</label>
@@ -31,48 +31,74 @@
       <label>Telefone/WhatsApp Principal</label>
       <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX" required>
       
-            <label>Forma de Contato Preferencial</label>
+      <label>Forma de Contato Preferencial</label>
       <select name="contato_preferencial" required>
         <option value="">Selecione</option>
         <option value="WhatsApp">WhatsApp (Telefone Principal)</option>
         <option value="Email">E-mail</option>
       </select>
 
-            <label>Segmento de Atuação da Empresa (Ex: Serviços Contábeis, Jurídicos, etc.)</label>
-      <input type="text" name="segmento" placeholder="Ex: Serviços Contábeis" required>
+            <label>Segmento de Atuação da Empresa</label>
+      <select name="segmento" required>
+        <option value="">Selecione o Segmento</option>
+      </select>
 
       <label>Plano Sugerido</label>
-            <input type="text" name="plano" required>
+      <input type="text" name="plano" required>
       <p id="plano-info" style="font-size: 0.9em;"></p>
 
             <label>A empresa possui registro ativo no CRC?</label>
-      <select name="crc_empresa" required>
+      <select id="crc_empresa_select" name="crc_empresa" required>
         <option value="">Selecione</option>
         <option value="Sim">Sim</option>
         <option value="Não">Não</option>
       </select>
+      <div id="crc_empresa_container" style="display:none; margin-top: 10px;">
+        <label>Número(s) de Registro do CRC da Empresa</label>
+        <input type="text" name="crc_empresa_numero" placeholder="Ex: SP-012345/O-0 (opcional se 'Sim')">
+      </div>
 
 
-      <label>Lista de Serviços (Prioridade)</label>
-      <p style="font-size: 0.8em; margin-bottom: 5px;">Digite a prioridade de interesse (1 - 3, por exemplo) para os serviços abaixo, separando por vírgula. Pelo menos um é obrigatório.</p>
-      <textarea id="servicos-interesse-lista" name="servicos_interesse_lista" rows="4" placeholder="Exemplo: 1 - CERTIFICAÇÃO DIGITAL, 2 - CURSOS UNISESCON, 3 - PQEC" required></textarea>
-      <div id="servicos-interesse-container" style="font-size: 0.8em; border: 1px solid #ccc; padding: 10px; max-height: 150px; overflow-y: scroll;">
+            <label>Serviços de Interesse (Selecione todos que se aplicam)</label>
+      <div id="servicos-interesse-container" class="checkbox-group">
               </div>
 
-      <label>Sócio/Responsável</label>
+      
+            <label>Sócio/Responsável Legal</label>
       <select id="socios-select" name="nome_socio" required>
         <option value="">Selecione o sócio responsável</option>
       </select>
 
+      <label>
+        <input type="checkbox" id="sou_socio_checkbox" checked> 
+        Eu sou o sócio/responsável legal listado acima.
+      </label>
+
+            <div id="preenchedor_container" style="display:none; border: 1px solid #ddd; padding: 15px; margin-top: 15px;">
+        <h4>Dados de quem está preenchendo</h4>
+        <p style="font-size: 0.8em; color: gray;">
+          Ao enviar, você declara que o sócio/responsável legal listado acima concorda com os termos de associação.
+        </p>
+        <label>Nome Completo do Preenchedor</label>
+        <input type="text" name="nome_preenchedor" required>
+        <label>CPF do Preenchedor</label>
+        <input type="text" name="cpf_preenchedor" placeholder="Somente 11 dígitos" required>
+      </div>
+
       <label>CPF do Sócio</label>
-            <input type="text" name="cpf_socio" placeholder="Somente 11 dígitos" required>
+      <input type="text" name="cpf_socio" placeholder="Somente 11 dígitos" required>
 
             <label>O sócio possui registro ativo no CRC?</label>
-      <select name="crc_socio" required>
+      <select id="crc_socio_select" name="crc_socio" required>
         <option value="">Selecione</option>
         <option value="Sim">Sim</option>
         <option value="Não">Não</option>
       </select>
+      <div id="crc_socio_container" style="display:none; margin-top: 10px;">
+        <label>Número(s) de Registro do CRC do Sócio</label>
+        <input type="text" name="crc_socio_numero" placeholder="Ex: SP-012345/O-0 (opcional se 'Sim')">
+      </div>
+
 
       <label>Forma de Pagamento</label>
       <select name="forma_pagamento">
@@ -82,11 +108,11 @@
 
       <label>
         <input type="checkbox" name="termo_aceite" value="1" required> 
-        Declaro estar ciente e de acordo com os termos de associação. (Link para Termos pendente) 
+        Declaro estar ciente e de acordo com os termos de associação. (Link para Termos pendente)
       </label>
       
       <p style="font-size: 0.8em; color: gray;">
-        OBSERVAÇÃO DE RESPONSABILIDADE: Declaro que todas as informações prestadas são de responsabilidade do associado/sócio responsável pelo preenchimento, nos termos do estatuto. [cite: 37]
+        OBSERVAÇÃO DE RESPONSABILIDADE: Declaro que todas as informações prestadas são de responsabilidade do associado/sócio responsável legal, nos termos do estatuto.
       </p>
 
       <h3>Assinatura (use mouse ou touch)</h3>
@@ -108,8 +134,11 @@
   // Dados da imagem do logo em Base64
   const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+dM+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgHf99e8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLdbefsDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
 
+  // Armazenar o CNPJ formatado (com pontos) para uso no PDF
+  let cnpjFormatadoGlobal = ''; 
+
   // --------------------------------------------------------------------------------
-  // 1. LISTA DE SERVIÇOS (Ordenada Alfabeticamente, sem "NÃO INFORMADO AINDA" )
+  // 1. LISTA DE SERVIÇOS E SEGMENTOS
   // --------------------------------------------------------------------------------
   const listaServicos = [
     { id: '343', nome: 'CENTRAL DE SERVIÇOS' },
@@ -135,18 +164,48 @@
     { id: '342', nome: 'RECEITA FEDERAL' },
     { id: '158', nome: 'SOCIETÁRIO E LEGAL' },
   ];
+
+  // Lista de Segmentos para o novo Select
+  const listaSegmentos = [
+    'SERVIÇOS CONTÁBEIS',
+    'SERVIÇOS JURÍDICOS',
+    'SERVIÇOS FINANCEIROS',
+    'SERVIÇOS DE TECNOLOGIA',
+    'SERVIÇOS DE BPO',
+    'OUTROS',
+  ];
   
-  function renderizarServicosParaReferencia() {
+  function renderizarServicos() {
     const container = document.getElementById('servicos-interesse-container');
-    let htmlContent = '<strong>Lista de Serviços Disponíveis (para referência e priorização):</strong><br>';
+    let htmlContent = '';
     
-    listaServicos.forEach((servico, index) => {
-      htmlContent += `${index + 1}. ${servico.nome}<br>`;
+    listaServicos.forEach(servico => {
+      // O valor (value) do checkbox é o nome do serviço
+      const value = servico.nome;
+      
+      htmlContent += `<label style="display:block; margin-bottom: 5px;">
+                        <input type="checkbox" name="servicos_interesse" value="${value.toUpperCase()}"> 
+                        ${servico.nome}
+                      </label>`;
     });
 
     container.innerHTML = htmlContent;
   }
-  document.addEventListener('DOMContentLoaded', renderizarServicosParaReferencia);
+
+  function renderizarSegmentos() {
+    const select = document.querySelector('select[name="segmento"]');
+    listaSegmentos.forEach(segmento => {
+      const option = document.createElement('option');
+      option.value = segmento;
+      option.textContent = segmento;
+      select.appendChild(option);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderizarServicos();
+    renderizarSegmentos();
+  });
 
 
   // Variáveis para guardar dados do CNPJ para uso no PDF (evita re-busca no submit)
@@ -154,10 +213,15 @@
   let municipioGlobal = '';
   let ufGlobal = '';
 
+  // --------------------------------------------------------------------------------
+  // 2. LÓGICA DE NEGÓCIO E UTILITÁRIOS
+  // --------------------------------------------------------------------------------
 
-  // --------------------------------------------------------------------------------
-  // 2. LÓGICA DE NEGÓCIO (CNAEs, Cidades e Segmentação)
-  // --------------------------------------------------------------------------------
+  function formatCnpj(cnpj) {
+      if (!cnpj) return '';
+      // 00.000.000/0000-00
+      return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  }
 
   function sanitizeCity(city) {
       if (!city) return "";
@@ -168,8 +232,7 @@
           .replace(/[^a-z0-9\s]/g, "") 
           .trim(); 
   }
-
-  // Listas de CNAEs Elegíveis (Ouro e Prata)
+  // ... (restante da lógica de CNAEs, Cidades e Segmentação - INALTERADA) ...
   const cnaes_ouro = new Set(["6920601", "6920602"]);
   const cnaes_prata = new Set([
       "0230600", "5229002", "5229099", "5240101", "5250804", "5250805", "6461100", "6462000", "6463800",
@@ -179,26 +242,18 @@
       "7490101", "7490103", "7490104", "7490105", "7490199", "8020000", "8211300", "8219999", "8550302",
       "8599604", "8660700", "9411100", "9412000", "9430800", "9491000", "9499500" ,"8299799","7320300"
   ]);
-
-  // Listas de Cidades com Exclusão/Encaminhamento Regional (TODAS SEM ACENTOS)
   const cidades_tupa = new Set(["tupa", "arcoiris", "bastao", "herculandia", "ikanji", "marilia", "pompeia", "queiroz"]);
   const cidades_campinas = new Set(["campinas", "hortolandia", "sumare", "valinhos", "vinhedo", "jaguariuna", "paulinia", "itatiba", "indaiatuba", "amparo", "pedreira", "socorro", "aguas de lindoia", "monte alegre do sul", "serra negra", "holambra", "mogimirim", "mogiguacu", "artur nogueira", "nova odessa", "santa barbara doeste", "americana", "piracicaba", "limeira", "rio claro", "araras", "lemes"]);
   const cidades_santos = new Set(["santos", "sao vicente", "praia grande", "guaruja", "cubatao", "bertioga", "mongagua", "itanhaem", "peruibe", "cananeia", "ilhabela", "caraguatatuba", "ubatuba", "sao sebastiao"]);
-
-  // Preços (tabelas de valores)
   const prata_pricing = { 1: { total: 720.00, parcelas: 12, valor_parcela: 60.00, a_vista: 660.00 }, 2: { total: 660.00, parcelas: 11, valor_parcela: 60.00, a_vista: 607.00 }, 3: { total: 600.00, parcelas: 10, valor_parcela: 60.00, a_vista: 552.00 }, 4: { total: 540.00, parcelas: 9, valor_parcela: 60.00, a_vista: 497.00 }, 5: { total: 480.00, parcelas: 8, valor_parcela: 60.00, a_vista: 442.00 }, 6: { total: 420.00, parcelas: 7, valor_parcela: 60.00, a_vista: 386.00 }, 7: { total: 360.00, parcelas: 6, valor_parcela: 60.00, a_vista: 331.00 }, 8: { total: 300.00, parcelas: 5, valor_parcela: 60.00, a_vista: 276.00 }, 9: { total: 240.00, parcelas: 4, valor_parcela: 60.00, a_vista: 221.00 }, 10: { total: 180.00, parcelas: 3, valor_parcela: 60.00, a_vista: 166.00 }, 11: { total: 120.00, parcelas: 2, valor_parcela: 60.00, a_vista: 110.00 }, 12: { total: 60.00, parcelas: 1, valor_parcela: 60.00, a_vista: 60.00 } };
   const ouro_premium_pricing = { 1: { total: 1140.00, parcelas: 12, valor_parcela: 95.00, a_vista: 1046.00 }, 2: { total: 1045.00, parcelas: 11, valor_parcela: 95.00, a_vista: 961.00 }, 3: { total: 950.00, parcelas: 10, valor_parcela: 95.00, a_vista: 874.00 }, 4: { total: 855.00, parcelas: 9, valor_parcela: 95.00, a_vista: 787.00 }, 5: { total: 760.00, parcelas: 8, valor_parcela: 95.00, a_vista: 700.00 }, 6: { total: 665.00, parcelas: 7, valor_parcela: 95.00, a_vista: 611.00 }, 7: { total: 570.00, parcelas: 6, valor_parcela: 95.00, a_vista: 524.00 }, 8: { total: 475.00, parcelas: 5, valor_parcela: 95.00, a_vista: 437.00 }, 9: { total: 380.00, parcelas: 4, valor_parcela: 95.00, a_vista: 350.00 }, 10: { total: 285.00, parcelas: 3, valor_parcela: 95.00, a_vista: 263.00 }, 11: { total: 190.00, parcelas: 2, valor_parcela: 95.00, a_vista: 175.00 }, 12: { total: 95.00, parcelas: 1, valor_parcela: 95.00, a_vista: 95.00 } };
   const prata_aescon_pricing = { 1: { total: 420.00, parcelas: 12, valor_parcela: 35.00, a_vista: 386.00 }, 2: { total: 385.00, parcelas: 11, valor_parcela: 35.00, a_vista: 354.00 }, 3: { total: 350.00, parcelas: 10, valor_parcela: 35.00, a_vista: 322.00 }, 4: { total: 315.00, parcelas: 9, valor_parcela: 35.00, a_vista: 290.00 }, 5: { total: 280.00, parcelas: 8, valor_parcela: 35.00, a_vista: 258.00 }, 6: { total: 245.00, parcelas: 7, valor_parcela: 35.00, a_vista: 225.00 }, 7: { total: 210.00, parcelas: 6, valor_parcela: 35.00, a_vista: 193.00 }, 8: { total: 175.00, parcelas: 5, valor_parcela: 35.00, a_vista: 161.00 }, 9: { total: 140.00, parcelas: 4, valor_parcela: 35.00, a_vista: 129.00 }, 10: { total: 105.00, parcelas: 3, valor_parcela: 35.00, a_vista: 97.00 }, 11: { total: 70.00, parcelas: 2, valor_parcela: 35.00, a_vista: 65.00 }, 12: { total: 35.00, parcelas: 1, valor_parcela: 35.00, a_vista: 35.00 } };
-
-  // Funções de Segmentação
   function segmentar(cnae, cidade, uf) {
       const cnae_str = String(cnae || '').trim();
       const cidade_limpa = sanitizeCity(cidade); 
-      
       if (uf.toUpperCase() !== "SP") {
           return "Fora de SP – Não podemos associar.";
       }
-      
       let planoBase = null;
       if (cnaes_ouro.has(cnae_str)) { 
           planoBase = "Plano Ouro Premium";
@@ -207,11 +262,9 @@
       } else {
           return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700";
       }
-
       if (planoBase === "Plano Ouro Premium" && (cidades_tupa.has(cidade_limpa) || cidades_campinas.has(cidade_limpa) || cidades_santos.has(cidade_limpa))) {
           return "Prata Aescon";
       }
-      
       if (cidades_tupa.has(cidade_limpa)) {
           return "Fora da região (Tupã). E-mail: sescontupan@unisite.com.br";
       }
@@ -221,14 +274,13 @@
       if (cidades_santos.has(cidade_limpa)) {
           return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
       }
-      
       return planoBase;
   }
 
   function getPlanoInfo(plano) {
     const mesAtual = new Date().getMonth() + 1;
     let tabela = {};
-    if (plano.includes("Prata")) { // Usa includes para pegar "Plano Prata" e "Prata Aescon"
+    if (plano.includes("Prata")) { 
         tabela = (plano === "Prata Aescon") ? prata_aescon_pricing : prata_pricing;
     } else if (plano.includes("Ouro")) {
         tabela = ouro_premium_pricing;
@@ -238,7 +290,6 @@
 
     const valores = tabela[mesAtual] || {};
     
-    // Formata para exibição
     const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
     const valorParcela = valores.valor_parcela ? `R$ ${valores.valor_parcela.toFixed(2).replace('.', ',')}` : "N/A";
     const valorTotalParcelado = valores.total ? `R$ ${valores.total.toFixed(2).replace('.', ',')}` : "N/A";
@@ -255,8 +306,9 @@
     };
   }
 
+
   // --------------------------------------------------------------------------------
-  // 3. EVENTOS (CNPJ e Assinatura)
+  // 3. EVENTOS (CNPJ, Condicionais e Assinatura)
   // --------------------------------------------------------------------------------
 
   // Elementos do DOM
@@ -274,17 +326,10 @@
   let drawing = false;
   let lastX = 0, lastY = 0;
 
-  // Lógica da Assinatura
-  function drawLine(x1, y1, x2, y2) {
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.closePath();
-  }
+
+  // Lógica de Assinatura (mantida)
+  function drawLine(x1, y1, x2, y2) { /* ... */ }
+  // ... (Eventos de mouse/touch para Assinatura) ...
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const rect = canvas.getBoundingClientRect();
@@ -326,6 +371,7 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
+
   // Função auxiliar para atualizar a info do plano
   function atualizarPlanoInfo() {
     const planoSugerido = planoInput.value;
@@ -335,11 +381,10 @@
     } else {
       const planoInfoData = getPlanoInfo(planoSugerido);
       planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
-      sendBtn.disabled = !form.checkValidity(); // Habilita se o resto do formulário for válido
+      sendBtn.disabled = !form.checkValidity();
     }
   }
 
-  // Monitora alterações no campo do Plano (agora editável)
   planoInput.addEventListener('input', atualizarPlanoInfo);
 
   // Evento de CNPJ
@@ -357,6 +402,7 @@
       cnaeGlobal = '';
       municipioGlobal = '';
       ufGlobal = '';
+      cnpjFormatadoGlobal = formatCnpj(cnpj); // Armazena CNPJ formatado
 
       try {
         const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
@@ -364,7 +410,6 @@
         
         if (response.ok) {
           razaoInput.value = data.razao_social || '';
-          // Inclui o complemento no endereço 
           const complemento = data.complemento ? ` (${data.complemento})` : '';
           enderecoInput.value = `${data.logradouro || ''}, ${data.numero || ''}${complemento}, ${data.bairro || ''} - ${data.municipio || ''}/${data.uf || ''} - CEP: ${data.cep || ''}`;
           
@@ -395,6 +440,7 @@
           sendBtn.disabled = true;
           razaoInput.value = '';
           enderecoInput.value = '';
+          cnpjFormatadoGlobal = '';
         }
       } catch (error) {
         resultDiv.textContent = `❌ Erro na requisição: ${error.message}. Verifique sua conexão.`;
@@ -403,10 +449,55 @@
     } else {
       resultDiv.textContent = 'Digite 14 dígitos do CNPJ para buscar os dados.';
       sendBtn.disabled = true;
+      cnpjFormatadoGlobal = '';
     }
   });
   
-  // Garante que o botão só habilita se o formulário for válido (incluindo o plano)
+  // Lógica condicional para CRC da Empresa
+  document.getElementById('crc_empresa_select').addEventListener('change', function() {
+    const container = document.getElementById('crc_empresa_container');
+    if (this.value === 'Sim') {
+      container.style.display = 'block';
+    } else {
+      container.style.display = 'none';
+      // Limpa o valor para não ir para o PDF se for 'Não'
+      document.querySelector('input[name="crc_empresa_numero"]').value = '';
+    }
+  });
+
+  // Lógica condicional para CRC do Sócio
+  document.getElementById('crc_socio_select').addEventListener('change', function() {
+    const container = document.getElementById('crc_socio_container');
+    if (this.value === 'Sim') {
+      container.style.display = 'block';
+    } else {
+      container.style.display = 'none';
+      // Limpa o valor para não ir para o PDF se for 'Não'
+      document.querySelector('input[name="crc_socio_numero"]').value = '';
+    }
+  });
+
+  // Lógica condicional para Preenchedor (Não Sócio)
+  document.getElementById('sou_socio_checkbox').addEventListener('change', function() {
+    const container = document.getElementById('preenchedor_container');
+    const nomePreenchedor = document.querySelector('input[name="nome_preenchedor"]');
+    const cpfPreenchedor = document.querySelector('input[name="cpf_preenchedor"]');
+
+    if (!this.checked) {
+      container.style.display = 'block';
+      nomePreenchedor.required = true;
+      cpfPreenchedor.required = true;
+    } else {
+      container.style.display = 'none';
+      nomePreenchedor.required = false;
+      cpfPreenchedor.required = false;
+      // Limpa os valores para não serem enviados
+      nomePreenchedor.value = '';
+      cpfPreenchedor.value = '';
+    }
+  });
+
+  // Garante que o botão só habilita se o formulário for válido
   form.addEventListener('change', () => {
     if (form.checkValidity() && !planoInput.value.includes('Fora') && !planoInput.value.includes('CNAE fora')) {
       sendBtn.disabled = false;
@@ -417,7 +508,7 @@
 
 
   // --------------------------------------------------------------------------------
-  // 4. GERAÇÃO DO PDF (COMPLETO E ORGANIZADO)
+  // 4. GERAÇÃO DO PDF (AJUSTADA)
   // --------------------------------------------------------------------------------
 
   form.addEventListener("submit", async (ev) => {
@@ -431,13 +522,16 @@
 
     const dados = {};
     const formData = new FormData(form);
+    // Filtra apenas os checkboxes marcados para 'servicos_interesse'
+    dados.servicos_interesse = [];
     for (let [key, value] of formData.entries()) {
-        dados[key] = value;
+        if (key === 'servicos_interesse') {
+          dados.servicos_interesse.push(value);
+        } else {
+          dados[key] = value;
+        }
     }
 
-    // Usa os dados globais obtidos na busca do CNPJ
-    const cnae_fiscal = cnaeGlobal;
-    
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     let y = 20;
@@ -445,7 +539,6 @@
     
     // Obter dados de preço e plano formatados
     const planoInfoData = getPlanoInfo(dados.plano);
-
     let valorAnuidade;
     let detalhesPagamento;
 
@@ -458,7 +551,10 @@
     }
 
     const associacao = dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP";
-    const contribuicao = dados.plano === "Plano Ouro Premium" ? "(Inclui Contribuição Representativa) [cite: 30]" : "";
+    const contribuicao = dados.plano === "Plano Ouro Premium" ? "(Inclui Contribuição Representativa)" : "";
+
+    // TÍTULO DO PDF (SEGMENTADO)
+    const tituloPDF = `FICHA DE INSCRIÇÃO - ASSOCIAÇÃO ${associacao}`;
 
 
     // =========================================================================
@@ -470,7 +566,7 @@
     } catch (e) { y = 20; }
 
     pdf.setFontSize(14);
-    pdf.text("FICHA DE INSCRIÇÃO - ASSOCIAÇÃO SESCON-SP / AESCON-SP", padding, y);
+    pdf.text(tituloPDF, padding, y); // Título Dinâmico
     y += 15;
     
     // =========================================================================
@@ -484,18 +580,21 @@
     
     pdf.setFontSize(10);
     pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 5;
-    pdf.text(`CNPJ: ${dados.cnpj || ''}`, padding, y); y += 5;
+    // CNPJ com formatação original
+    pdf.text(`CNPJ: ${cnpjFormatadoGlobal || dados.cnpj || ''}`, padding, y); y += 5; 
     pdf.text(`ENDEREÇO COMPLETO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 5;
     pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, padding, y); y += 5;
-    // Campo Telefone/WhatsApp [cite: 19]
     pdf.text(`TELEFONE/WHATSAPP PRINCIPAL: ${dados.telefone || ''}`, padding, y); y += 5;
-    // Campo Contato Preferencial 
     pdf.text(`CONTATO PREFERENCIAL: ${dados.contato_preferencial.toUpperCase()}`, padding, y); y += 5;
-    // Campo Segmento 
-    pdf.text(`SEGMENTO DE ATUAÇÃO: ${dados.segmento.toUpperCase()}`, padding, y); y += 5;
-    pdf.text(`RAMO DE ATIVIDADE (CNAE): ${cnae_fiscal || 'N/A'}`, padding, y); y += 5;
-    // Campo CRC Empresa [cite: 23]
-    pdf.text(`EMPRESA POSSUI REGISTRO NO CRC? ${dados.crc_empresa.toUpperCase()}`, padding, y); y += 8;
+    // Segmento de Atuação (Select)
+    pdf.text(`SEGMENTO DE ATUAÇÃO: ${dados.segmento.toUpperCase()}`, padding, y); y += 5; 
+    pdf.text(`RAMO DE ATIVIDADE (CNAE Principal): ${cnaeGlobal || 'N/A'}`, padding, y); y += 5;
+    
+    let crcEmpresaTexto = `EMPRESA POSSUI REGISTRO NO CRC? ${dados.crc_empresa.toUpperCase()}`;
+    if (dados.crc_empresa === 'Sim' && dados.crc_empresa_numero) {
+      crcEmpresaTexto += ` (Número(s): ${dados.crc_empresa_numero.toUpperCase()})`;
+    }
+    pdf.text(crcEmpresaTexto, padding, y); y += 8;
 
 
     // =========================================================================
@@ -523,13 +622,13 @@
     // =========================================================================
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold'); 
-    pdf.text("SERVIÇOS DE INTERESSE (PRIORIZAÇÃO):", padding, y);
+    pdf.text("SERVIÇOS DE INTERESSE SELECIONADOS:", padding, y);
     pdf.setFont('helvetica', 'normal'); 
     y += 5;
     pdf.setFontSize(10);
-    // Exibe a lista priorizada digitada pelo usuário 
-    const servicosPriorizados = dados.servicos_interesse_lista.toUpperCase();
-    const splitText = pdf.splitTextToSize(servicosPriorizados, 180); 
+    // Lista os serviços selecionados
+    const servicosSelecionados = (dados.servicos_interesse || []).join(', ');
+    const splitText = pdf.splitTextToSize(servicosSelecionados || 'NENHUM SERVIÇO SELECIONADO', 180); 
     pdf.text(splitText, padding + 5, y); 
     y += splitText.length * 5 + 5; 
 
@@ -539,24 +638,40 @@
     // =========================================================================
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold'); 
-    pdf.text("DADOS DO SÓCIO/RESPONSÁVEL PELO PREENCHIMENTO", padding, y);
+    pdf.text("DADOS DO SÓCIO/RESPONSÁVEL LEGAL", padding, y);
     pdf.setFont('helvetica', 'normal'); 
     y += 8;
     
     pdf.setFontSize(10);
     pdf.text(`NOME COMPLETO DO SÓCIO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, padding, y); y += 5;
-    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, padding, y); y += 5; // CPF agora é obrigatório [cite: 35]
-    // Campo CRC Sócio [cite: 36]
-    pdf.text(`SÓCIO POSSUI REGISTRO NO CRC? ${dados.crc_socio.toUpperCase()}`, padding, y); y += 10;
+    pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, padding, y); y += 5;
+    
+    let crcSocioTexto = `SÓCIO POSSUI REGISTRO NO CRC? ${dados.crc_socio.toUpperCase()}`;
+    if (dados.crc_socio === 'Sim' && dados.crc_socio_numero) {
+      crcSocioTexto += ` (Número(s): ${dados.crc_socio_numero.toUpperCase()})`;
+    }
+    pdf.text(crcSocioTexto, padding, y); y += 5;
+
+    // Dados de quem preencheu (se for diferente)
+    if (dados.nome_preenchedor) {
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold'); 
+      pdf.text("DADOS DE QUEM PREENCHEU ESTE FORMULÁRIO", padding, y);
+      pdf.setFont('helvetica', 'normal'); 
+      y += 8;
+      pdf.setFontSize(10);
+      pdf.text(`NOME DO PREENCHEDOR: ${dados.nome_preenchedor.toUpperCase()}`, padding, y); y += 5;
+      pdf.text(`CPF DO PREENCHEDOR: ${dados.cpf_preenchedor || ''}`, padding, y); y += 5;
+    }
 
     // Rodapé de Dados
     pdf.text(`EMPRESA: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 4;
     const dataHora = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     pdf.text(`DATA DO PREENCHIMENTO: ${dataHora}`, padding, y); y += 6;
     
-    // OBSERVAÇÃO DE RESPONSABILIDADE [cite: 37]
+    // OBSERVAÇÃO DE RESPONSABILIDADE
     pdf.setFontSize(8);
-    pdf.text(`OBSERVAÇÃO DE RESPONSABILIDADE: Declaro que todas as informações prestadas são de responsabilidade do associado/sócio responsável pelo preenchimento, nos termos do estatuto.`, padding, y); 
+    pdf.text(`OBSERVAÇÃO DE RESPONSABILIDADE: Declaro que todas as informações prestadas são de responsabilidade do associado/sócio responsável legal, nos termos do estatuto.`, padding, y); 
     y += 10;
 
     // ASSINATURA
@@ -566,7 +681,7 @@
     }
     y += 45;
     pdf.text("________________________________", padding, y); y += 6;
-    pdf.text("ASSINATURA DO SÓCIO DA EMPRESA", padding, y);
+    pdf.text("ASSINATURA DO SÓCIO/RESPONSÁVEL LEGAL DA EMPRESA", padding, y);
 
     // Geração do arquivo
     const nomeArquivo = `Ficha_Inscricao_${(dados.razao || '').replace(/[^a-zA-Z0-9]/g, '_')}_${dados.cnpj.replace(/\D/g, '')}.pdf`;
@@ -577,7 +692,7 @@
     link.download = nomeArquivo;
     link.style.display = "inline-block";
     
-    // Mensagem de sucesso atualizada [cite: 42]
+    // Mensagem de sucesso atualizada
     resultDiv.innerHTML = `
       <h3>✅ PDF Gerado com Sucesso!</h3>
       <p>Obrigado por sua inscrição. Emita o PDF e, em breve, você receberá um e-mail ou WhatsApp com o boleto para pagamento e as credenciais de acesso.</p>

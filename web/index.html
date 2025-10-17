@@ -4,9 +4,7 @@
   <meta charset="utf-8" />
   <title>Ficha de Associação - SESCON</title>
   
-  <link rel="icon" type="image/png" href="sescon_sp_logo.png.png">
-
-  <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -316,11 +314,15 @@
   }
 
   function getPlanoInfo(plano) {
+    // CORREÇÃO PARA ERRO DE PDF: Garante que 'plano' é uma string para evitar 'Cannot read properties of undefined'
+    const planoStr = plano || ''; 
+    
     const mesAtual = new Date().getMonth() + 1;
     let tabela = {};
-    if (plano.includes("Prata")) { 
-        tabela = (plano === "Prata Aescon") ? prata_aescon_pricing : prata_pricing;
-    } else if (plano.includes("Ouro")) {
+    
+    if (planoStr.includes("Prata")) { 
+        tabela = (planoStr === "Prata Aescon") ? prata_aescon_pricing : prata_pricing;
+    } else if (planoStr.includes("Ouro")) {
         tabela = ouro_premium_pricing;
     } else {
         return { valor_a_vista: "N/A", valor_parcelado: "N/A", total: "N/A", valor_parcela: "N/A", parcelas: "N/A" };
@@ -714,7 +716,7 @@
     pdf.text("ASSINATURA DO SÓCIO/RESPONSÁVEL LEGAL DA EMPRESA", padding, y);
 
     // Geração do arquivo
-    const nomeArquivo = `Ficha_Inscricao_${(dados.razao || '').replace(/[^a-zA-Z0-9]/g, '_')}_${dados.cnpj.replace(/\D/g, '')}.pdf`;
+    const nomeArquivo = `Ficha_Inscricao_${(dados.razao || '').replace(/[^a-zA-Z0-9]/g, '_')}_${(dados.cnpj || '').replace(/\D/g, '')}.pdf`;
     const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.getElementById("downloadLink");

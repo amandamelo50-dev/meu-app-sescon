@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Inscrição - SESCON-SP / AESCON-SP</title>
+    <title>Ficha de Inscrição - Associação SESCON-SP / AESCON-SP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Estilos Customizados para Cores SESCON/AESCON */
@@ -28,11 +28,6 @@
             background-color: #a00000;
             border-color: #a00000;
         }
-        .alert-territorio {
-            background-color: #fff3cd;
-            color: #856404;
-            border-color: #ffeeba;
-        }
         .form-section-title {
             color: var(--aescon-gray);
             border-bottom: 1px solid #eee;
@@ -53,7 +48,7 @@
                     <h1 class="h4 mt-2" style="color: var(--sescon-red);">FICHA DE INSCRIÇÃO PARA ASSOCIAÇÃO</h1>
                 </div>
 
-                <form id="associationForm" method="POST" action="SEU_ARQUIVO_DE_BACKEND_ATUAL.php">
+                <form id="associationForm" method="POST" action="processar.php">
                     
                     <h2 class="form-section-title">1. Dados da Empresa</h2>
 
@@ -69,41 +64,57 @@
                             <div class="form-text text-danger" id="cnpj-error"></div>
                         </div>
                         <div class="col-md-5 mb-3">
-                            <label for="telefone" class="form-label">Telefone (WhatsApp): <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="telefone" name="telefone" required>
+                            <label for="telefoneEmpresa" class="form-label">Telefone (WhatsApp): <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="telefoneEmpresa" name="telefone_empresa" required>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="endereco" class="form-label">Endereço:</label>
-                        <input type="text" class="form-control" id="endereco" name="endereco" readonly>
+                        <label for="emailEmpresa" class="form-label">E-mail: <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="emailEmpresa" name="email_empresa" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="servicosInteresse" class="form-label">Serviços de Interesse:</label>
-                        <textarea class="form-control" id="servicosInteresse" name="servicosInteresse" rows="2" placeholder="Ex: ER JUCESP - FATURADO, EVI"></textarea>
+                        <label for="servicosInteresse" class="form-label">Serviços de Interesse (ER JUCESP, EVI, etc.):</label>
+                        <textarea class="form-control" id="servicosInteresse" name="servicos_interesse_input" rows="2" placeholder="Ex: 154SERVICO DE INTERESSE - ER JUCESP - FATURADO, 161SERVICO DE INTERESSE - EVI"></textarea>
                     </div>
 
                     <h2 class="form-section-title mt-4">2. Dados do Sócio/Responsável</h2>
 
+                    <div class="mb-3">
+                        <label for="tipoResp" class="form-label">Responsável pelo Preenchimento:</label>
+                        <select class="form-select" id="tipoResp" name="tipo_resp" required>
+                            <option value="Sócio" selected>Sócio da Empresa</option>
+                            <option value="Outro responsável">Outro responsável/Colaborador</option>
+                        </select>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="nomeSocio" class="form-label">Nome Completo: <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nomeSocio" name="nomeSocio" required>
+                            <label for="nomeSocio" class="form-label">Nome Completo do Sócio: <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nomeSocio" name="nome_socio_input" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="cpfSocio" class="form-label">CPF do Sócio: <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="cpfSocio" name="cpfSocio" maxlength="14" required>
+                            <input type="text" class="form-control" id="cpfSocio" name="cpf_socio_input" maxlength="14" required>
+                        </div>
+                    </div>
+                    <div id="outroRespFields" style="display:none;">
+                        <h3 class="form-section-title mt-4">Dados do Responsável (Se não for o Sócio)</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nomeOutroResp" class="form-label">Nome Completo do Responsável:</label>
+                                <input type="text" class="form-control" id="nomeOutroResp" name="nome_outro_resp_input">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="contatoOutroResp" class="form-label">Contato (E-mail/Telefone):</label>
+                                <input type="text" class="form-control" id="contatoOutroResp" name="contato_outro_resp_input">
+                            </div>
                         </div>
                     </div>
 
-                    <h2 class="form-section-title mt-4">3. Plano e Valores</h2>
-
+                    <h2 class="form-section-title mt-4">3. Plano, Valores e Pagamento</h2>
+                    
                     <div class="mb-3">
                         <label for="planoSuggerido" class="form-label">Plano Sugerido: <span class="text-danger">*</span></label>
                         <select class="form-select" id="planoSuggerido" name="planoSuggerido" required onchange="updatePlanDetails(this.value)">
@@ -120,14 +131,33 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="valorAVista" class="form-label">Valor à Vista:</label>
-                            <input type="text" class="form-control" id="valorAVista" name="valorAVista" value="N/A" readonly>
+                            <input type="text" class="form-control" id="valorAVista" name="valor_a_vista_input" value="N/A" readonly>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="valorParcelado" class="form-label">Valor Parcelado:</label>
-                            <input type="text" class="form-control" id="valorParcelado" name="valorParcelado" value="N/A" readonly>
+                            <input type="text" class="form-control" id="valorParcelado" name="valor_parcelado_input" value="N/A" readonly>
                         </div>
                     </div>
                     
+                    <div class="mb-3">
+                        <label class="form-label">Forma de Pagamento:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="forma_pagamento" id="pagAVista" value="À vista" checked required>
+                            <label class="form-check-label" for="pagAVista">À vista (Boleto)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="forma_pagamento" id="pagParcelado" value="Parcelado" required>
+                            <label class="form-check-label" for="pagParcelado">Parcelado (Boleto)</label>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" value="Sim" id="termoAceite" name="termo_aceite" required>
+                        <label class="form-check-label" for="termoAceite">
+                            Declaro estar de acordo com as políticas de associação do SESCON-SP e solicito análise.
+                        </label>
+                    </div>
+
                     <button type="submit" class="btn btn-primary-sescon btn-lg w-100 mt-4">
                         Enviar Ficha de Inscrição
                     </button>
@@ -139,13 +169,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // --- LÓGICA DE FRONTEND (JAVASCRIPT) ---
-    // (As máscaras e a simulação de consulta CNPJ permanecem para usabilidade)
+    // Lógica para alternar campos de Sócio / Outro Responsável
+    document.getElementById('tipoResp').addEventListener('change', function() {
+        var isOutroResp = this.value === 'Outro responsável';
+        document.getElementById('outroRespFields').style.display = isOutroResp ? 'block' : 'none';
+        
+        // Se for "Outro responsável", os campos de sócio devem ser preenchidos manualmente ou via API
+        // Se for "Sócio", os campos de outro responsável podem ser limpos para não poluir o envio
+        if (!isOutroResp) {
+             document.getElementById('nomeOutroResp').value = '';
+             document.getElementById('contatoOutroResp').value = '';
+        }
+    });
 
-    const cnpjInput = document.getElementById('cnpj');
+    // MÁSCARAS E FUNÇÕES (deixadas em JS para simulação de usabilidade)
     
     // 1. MÁSCARA CNPJ
-    cnpjInput.addEventListener('input', function (e) {
+    document.getElementById('cnpj').addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, ''); 
         value = value.replace(/^(\d{2})(\d)/, '$1.$2'); 
         value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
@@ -163,37 +203,33 @@
         e.target.value = value.substring(0, 14);
     });
     
-    // 3. SIMULAÇÃO DE CONSULTA CNPJ e Regra de Base Territorial
+    // 3. SIMULAÇÃO DE CONSULTA CNPJ para preenchimento de Razão Social (A LÓGICA FINAL ESTÁ NO PYTHON/BACKEND)
     function lookupCNPJ(cnpj) {
-        const errorDiv = document.getElementById('cnpj-error');
-        errorDiv.textContent = '';
-        
-        // Limpa campos preenchidos automaticamente
-        document.getElementById('razaoSocial').value = '';
-        document.getElementById('endereco').value = '';
-
-        // Simulação de Validação e Preenchimento (será substituída pelo BACKEND)
-        if (cnpj.includes('07513000000134')) { // CNPJ do seu PDF de Exemplo [cite: 4]
-            document.getElementById('razaoSocial').value = 'NOME DA EMPRESA (API PREENCHE)';
-            document.getElementById('endereco').value = 'AV. BRASIL, 123 - CENTRO';
-            // A lógica real de bloqueio de Base Territorial (Campinas, Santos, etc.)
-            // DEVE estar no código de Backend.
+        // Esta função deve ser substituída pela chamada AJAX ou fetch para o seu backend PHP/Python que consulta a Receita Federal
+        // Por agora, apenas simula o preenchimento da Razão Social
+        const cnpjLimpo = cnpj.replace(/\D/g, '');
+        if (cnpjLimpo.length === 14) {
+             // Simulação de preenchimento após API
+             document.getElementById('razaoSocial').value = 'Razão Social da Empresa (Preenchida pela API)';
+             // ... e outros campos como Endereço/CNAE
         }
-        // ... (o restante da lógica de simulação permanece)
     }
     
-    // 4. LÓGICA DE ATUALIZAÇÃO DO PLANO E VALORES
+    // 4. LÓGICA DE ATUALIZAÇÃO DO PLANO E VALORES (A LÓGICA FINAL ESTÁ NO PYTHON/BACKEND)
     function updatePlanDetails(plano) {
         const detailsDiv = document.getElementById('plano-details');
         const vistaInput = document.getElementById('valorAVista');
         const parceladoInput = document.getElementById('valorParcelado');
+        
         let descricao = '';
         let valorBase = 0;
 
+        // **NOTA:** ESTA TABELA DE PREÇOS DEVE SER ESPELHADA E ATUALIZADA NO SEU CÓDIGO PYTHON!
         if (plano === 'Plano Ouro Premium') {
             descricao = 'Inclui associação ao SESCON e à AESCON-SP + Contribuição Representativa. O plano mais completo.';
             valorBase = 1200.00;
         } else if (plano === 'Plano Ouro') {
+             // Ouro não apareceu nas suas regras, mas mantido por segurança.
             descricao = 'Plano Ouro. Inclui associação ao SESCON-SP e à AESCON-SP.';
             valorBase = 900.00;
         } else if (plano === 'Plano Prata') {
@@ -204,10 +240,9 @@
             valorBase = 0.00;
         }
 
-        // Atualiza a descrição
         detailsDiv.innerHTML = descricao;
         
-        // Simulação de Cálculo Proporcional (A LÓGICA FINAL É NO BACKEND!)
+        // Simulação de Cálculo Proporcional (DEVE SER FEITO NO BACKEND PARA SER CONFIÁVEL)
         const mesAtual = new Date().getMonth() + 1; 
         const mesesRestantes = 12 - mesAtual + 1;
         
@@ -222,8 +257,8 @@
             // Simulação de parcelamento (ex: 3x)
             parceladoInput.value = `3x R$ ${(valorProporcional / 3).toFixed(2).replace('.', ',')}`;
         } else {
-            vistaInput.value = 'N/A'; // N/A, conforme o PDF [cite: 14]
-            parceladoInput.value = 'N/A'; // N/A, conforme o PDF [cite: 15]
+            vistaInput.value = 'N/A';
+            parceladoInput.value = 'N/A';
         }
     }
 </script>

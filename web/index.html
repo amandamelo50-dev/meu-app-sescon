@@ -1,819 +1,282 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8" />
-    <title>Ficha de Associação - SESCON</title>
-    
-    <link rel="stylesheet" href="style.css" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Inscrição - SESCON-SP / AESCON-SP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilos Customizados para Cores SESCON/AESCON */
+        :root {
+            --sescon-red: #cc0000;
+            --aescon-gray: #333;
+        }
+        .header-brand {
+            border-bottom: 3px solid var(--sescon-red);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .header-brand img {
+            max-width: 250px;
+        }
+        .btn-primary-sescon {
+            background-color: var(--sescon-red);
+            border-color: var(--sescon-red);
+            transition: background-color 0.3s;
+        }
+        .btn-primary-sescon:hover {
+            background-color: #a00000;
+            border-color: #a00000;
+        }
+        .alert-territorio {
+            background-color: #fff3cd;
+            color: #856404;
+            border-color: #ffeeba;
+        }
+        .form-section-title {
+            color: var(--aescon-gray);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Ficha de Associação</h1>
-        <p style="color:red; font-weight:bold;">ATENÇÃO: Este formulário não está salvo. Utilize a função "Gerar PDF" ao finalizar.</p>
 
-        <form id="fichaForm">
-            <label>CNPJ</label>
-            <input type="text" name="cnpj" placeholder="Somente números" maxlength="14" required>
-
-            <label>Razão Social</label>
-            <input type="text" name="razao" required readonly>
-
-            <label>Endereço Completo (Rua, Número, Complemento, Bairro, Cidade/UF, CEP)</label>
-            <input type="text" name="endereco" readonly> 
-
-            <label>E-mail</label>
-            <input type="email" name="email" placeholder="contato@empresa.com" required>
-
-            <label>Telefone/WhatsApp Principal</label>
-            <input type="text" name="telefone" placeholder="(11) 9XXXX-XXXX" required>
-            
-            <label>Forma de Contato Preferencial</label>
-            <select name="contato_preferencial" required>
-                <option value="">Selecione</option>
-                <option value="WhatsApp">WhatsApp (Telefone Principal)</option>
-                <option value="Email">E-mail</option>
-            </select>
-
-            <label>Ramo de Atividade/Categoria Representada</label>
-            <select name="segmento" required>
-                <option value="">Selecione a Categoria</option>
-            </select>
-
-            <label>Plano Sugerido (Preenchimento Automático)</label>
-            <input type="text" name="plano" required readonly> 
-            <p id="plano-info" style="font-size: 0.9em;"></p>
-
-            <label>Serviços de Interesse (Selecione todos que se aplicam)</label>
-            <div id="servicos-interesse-container" class="checkbox-group">
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card p-4 shadow-lg">
+                <div class="header-brand text-center">
+                    <img src="https://via.placeholder.com/250x50?text=LOGO+SESCON/AESCON" alt="Logos SESCON-SP e AESCON-SP" class="img-fluid">
+                    <h1 class="h4 mt-2" style="color: var(--sescon-red);">FICHA DE INSCRIÇÃO PARA ASSOCIAÇÃO</h1>
                 </div>
 
-            
-            <label>Sócio/Responsável Legal</label>
-            <select id="socios-select" name="nome_socio" required>
-                <option value="">Selecione o sócio responsável</option>
-            </select>
+                <form id="associationForm" method="POST" action="processar.php">
+                    
+                    <h2 class="form-section-title">1. Dados da Empresa</h2>
 
-            <label>
-                <input type="checkbox" id="sou_socio_checkbox" checked> 
-                Eu sou o sócio/responsável legal listado acima.
-            </label>
+                    <div class="row">
+                        <div class="col-md-7 mb-3">
+                            <label for="cnpj" class="form-label">CNPJ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="cnpj" name="cnpj" maxlength="18" required onblur="lookupCNPJ(this.value)">
+                            <div class="form-text text-danger" id="cnpj-error"></div>
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="crcEmpresa" class="form-label">CRC da Empresa</label>
+                            <input type="text" class="form-control" id="crcEmpresa" name="crcEmpresa">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="razaoSocial" class="form-label">Razão Social</label>
+                        <input type="text" class="form-control" id="razaoSocial" name="razaoSocial" readonly required>
+                    </div>
 
-            <div id="preenchedor_container" style="display:none; border: 1px solid #ddd; padding: 15px; margin-top: 15px;">
-                <h4>Dados de quem está preenchendo</h4>
-                <p style="font-size: 0.8em; color: gray;">
-                    Ao enviar, você declara que o sócio/responsável legal listado acima concorda com os termos de associação.
-                </p>
-                <label>Nome Completo do Preenchedor</label>
-                <input type="text" name="nome_preenchedor"> 
-                <label>CPF do Preenchedor</label>
-                <input type="text" name="cpf_preenchedor" placeholder="Somente 11 dígitos">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="endereco" class="form-label">Endereço (Rua/Av.)</label>
+                            <input type="text" class="form-control" id="endereco" name="endereco" readonly>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="complemento" class="form-label">Número/Complemento</label>
+                            <input type="text" class="form-control" id="complemento" name="complemento" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="segmento" class="form-label">Segmento da Empresa (Ex: Contabilidade, Jurídico) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="segmento" name="segmento" required>
+                    </div>
+                    
+                    <div id="territorial-alert" class="alert alert-territorio d-none" role="alert">
+                        <strong>Atenção:</strong> Sua cidade não é atendida pelo SESCON-SP. Seu pedido será analisado para a **AESCON-SP** (Associação).
+                    </div>
+
+                    <h2 class="form-section-title mt-4">2. Dados do Sócio/Responsável</h2>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nomeSocio" class="form-label">Nome Completo do Sócio <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nomeSocio" name="nomeSocio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cpfSocio" class="form-label">CPF do Sócio <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="cpfSocio" name="cpfSocio" maxlength="14" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefone" class="form-label">Telefone (WhatsApp preferencial) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="telefone" name="telefone" required>
+                            <small class="form-text text-muted">A forma de contato preferencial é o WhatsApp.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">E-mail <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <h2 class="form-section-title mt-4">3. Plano de Associação</h2>
+
+                    <div class="mb-3">
+                        <label for="plano" class="form-label">Selecione o Plano Sugerido <span class="text-danger">*</span></label>
+                        <select class="form-select" id="plano" name="plano" required onchange="updatePlanDetails(this.value)">
+                            <option value="">Selecione um plano</option>
+                            <option value="Plano Ouro">Plano Ouro</option>
+                            <option value="Plano Ouro Premium">Plano Ouro Premium</option>
+                            <option value="Plano Prata">Plano Prata</option>
+                        </select>
+                        <div class="mt-2 p-2 border rounded" id="plano-details" style="min-height: 50px; background-color: #f8f9fa;">
+                            Selecione um plano para ver a descrição.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Valor Sugerido (Proporcional à Anuidade)</label>
+                        <input type="text" class="form-control" id="valorProporcional" name="valorProporcional" value="R$ 0,00" readonly>
+                        <div class="form-text text-info">
+                            O valor será confirmado pelo nosso sistema com base no mês de preenchimento.
+                        </div>
+                    </div>
+
+                    <h2 class="form-section-title mt-4">4. Declaração</h2>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="aceito" id="deAcordo" name="deAcordo" required>
+                        <label class="form-check-label" for="deAcordo">
+                            Declaro estar de acordo com as políticas de associação do SESCON-SP/AESCON-SP e solicito a análise.
+                            <a href="#" target="_blank"> (Consultar Estatuto e Termos)</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-sescon btn-lg w-100">
+                        Enviar Ficha de Inscrição
+                    </button>
+                    
+                    <div class="form-text text-center mt-3">
+                        <small>Ao enviar, você concorda que o preenchimento dos dados é de sua responsabilidade.</small>
+                    </div>
+
+                </form>
             </div>
-
-            <label>CPF do Sócio</label>
-            <input type="text" name="cpf_socio" placeholder="Somente 11 dígitos" required>
-
-            <label>O sócio possui registro ativo no CRC?</label>
-            <select id="crc_socio_select" name="crc_socio" required>
-                <option value="">Selecione</option>
-                <option value="Sim">Sim</option>
-                <option value="Não">Não</option>
-            </select>
-            <div id="crc_socio_container" style="display:none; margin-top: 10px;">
-                <label>Número(s) de Registro do CRC do Sócio</label>
-                <input type="text" name="crc_socio_numero" placeholder="Ex: SP-012345/O-0 (opcional se 'Sim')">
-            </div>
-
-
-            <label>Forma de Pagamento</label>
-            <select name="forma_pagamento">
-                <option value="Parcelado">Parcelado</option>
-                <option value="À vista">À vista</option>
-            </select>
-
-            <label>
-                <input type="checkbox" name="termo_aceite" value="1" required> 
-                Declaro estar ciente e de acordo com os termos de associação. (Link para Termos pendente)
-            </label>
-            
-            <p style="font-size: 0.8em; color: gray;">
-                OBSERVAÇÃO DE RESPONSABILIDADE: Declaro que todas as informações prestadas são de responsabilidade do associado/sócio responsável legal, nos termos do estatuto.
-            </p>
-
-            <h3>Assinatura (use mouse ou touch)</h3>
-            <canvas id="signature-pad" width=600 height=200 style="border:1px solid #ccc;"></canvas>
-            <div class="sig-buttons">
-                <button type="button" id="clearBtn">Limpar Assinatura</button>
-            </div>
-
-            <button type="submit" id="sendBtn" disabled>Gerar PDF</button>
-        </form>
-
-        <div id="result" style="margin-top:20px;"></div>
-        <a id="downloadLink" style="display:none">📥 Baixar PDF</a>
+        </div>
     </div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    window.jsPDF = window.jspdf.jsPDF;
-
-    // Dados da imagem do logo em Base64
-    const SESCON_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUsAAABjCAYAAAB2b44XAAAAAXNSR0IArs4c6QAAAK9JREFUeJzt3EEKgDAQRcGrw3Y8vP+5hE2Q2zS6+oD715x/nL9o8Wz9FwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAt+V878E4Jz3nOcfF551mX7XqW93uT/k4Jz9K+Xv92AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC35Zz1pZ73pXy6L3e7v5Tf8vB/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIBf9vP9h1L5U8qfUt73UfI7zvsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAID3/R16vQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsG936w5vAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADg26f6OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd3/vXwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgt1t5+wMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB3/fXvAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHC3W3n7AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+E1/8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC4W3z+EwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAd4l/17sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA1/y/Q27xPw/Y7QkAAAAASUVORK5CYII=';
-
-    // Armazenar o CNPJ formatado (com pontos) para uso no PDF
-    let cnpjFormatadoGlobal = ''; 
-
-    // --------------------------------------------------------------------------------
-    // 1. LISTA DE SERVIÇOS E SEGMENTOS (ATUALIZADA)
-    // --------------------------------------------------------------------------------
-    const listaServicos = [
-        { id: '343', nome: 'CENTRAL DE SERVIÇOS' },
-        { id: '155', nome: 'CERTIFICAÇÃO DIGITAL' },
-        { id: '347', nome: 'CERTIFICADO DIGITAL GRATUITO' },
-        { id: '150', nome: 'BOLSA DE TALENTOS' },
-        { id: '156', nome: 'CONTÁBIL STORE' },
-        { id: '348', nome: 'CONTRIBUIÇÃO REPRESENTATIVA' },
-        { id: '153', nome: 'CONSULTORIA JURÍDICA - IOB TELEFONE' },
-        { id: '358', nome: 'CONSULTORIA JURÍDICA - IOB EXPLICA' },
-        { id: '151', nome: 'CONVENÇÃO COLETIVA' },
-        { id: '166', nome: 'COWORKING' },
-        { id: '152', nome: 'CURSOS UNISESCON' },
-        { id: '165', nome: 'ENDEREÇO FISCAL' },
-        { id: '154', nome: 'ER JUCESP - FATURADO' },
-        { id: '161', nome: 'EVENTOS' },
-        { id: '149', nome: 'INSTITUCIONAL' },
-        { id: '306', nome: 'LOCAÇÃO DE AUDITÓRIO' },
-        { id: '317', nome: 'PARCERIAS' },
-        { id: '157', nome: 'PESQUISAS' },
-        { id: '160', nome: 'PQEC' },
-        { id: '159', nome: 'PROJETO LGPD' },
-        { id: '342', nome: 'RECEITA FEDERAL' },
-        { id: '158', nome: 'SOCIETÁRIO E LEGAL' },
-    ];
-
-    // Lista de Segmentos ATUALIZADA - 56 Categorias Representadas
-    const listaSegmentos = [
-        'Atividade de apoio à produção florestal',
-        'Serviços de reboque de veículos',
-        'Outras atividades auxiliares dos transportes terrestres não especificadas anteriormente',
-        'Operação dos aeroportos e campos de aterrissagem',
-        'Organização logística do transporte de carga',
-        'Operador de transporte multimodal – OTM',
-        'Holdings de instituições financeiras',
-        'Holdings de instituições não-financeiras',
-        'Outras sociedades de participação, exceto holdings',
-        'Bolsa de valores',
-        'Bolsa de mercadorias',
-        'Bolsa de mercadorias e futuros',
-        'Administração de mercados de balcão organizados',
-        'Agentes de investimentos em aplicações financeiras',
-        'Administração de cartões de crédito',
-        'Correspondêntes de instituições financeiras',
-        'Representação de bancos estrangeiros',
-        'Outras atividades auxiliares dos serviços financeiros não especificadas anteriormente',
-        'Peritos e avaliadores de seguros',
-        'Auditoria e consultoria atuarial',
-        'Atividades auxiliares dos seguros, da previdência complementar e dos planos de saúde não especificadas anteriormente',
-        'Atividades de administração de fundos por contrato ou comissão',
-        'Atividades auxiliares da justiça: arbitragem, mediação, avaliações perícia.',
-        'Agente de propriedade industrial',
-        'Atividades de contabilidade',
-        'Atividades de consultoria e auditoria contábil e tributária',
-        'Atividades de consultoria em gestão empresarial, exceto consultoria técnica específica',
-        'Serviços de cartografia, topografia e geodésia',
-        'Atividades de estudos geológicos (prospecção geológica)',
-        'Serviços de desenho técnico relacionados à arquitetura e engenharia',
-        'Serviços de perícia técnica relacionados à segurança do trabalho',
-        'Testes e análises técnicas ( ensaios de materiais e produtos , análise de qualidade )',
-        'Pesquisa e desenvolvimento experimental em ciências físicas e naturais',
-        'Pesquisa e desenvolvimento experimental em ciências sociais e humanas',
-        'Promoção de Vendas',
-        'Consultoria em publicidade',
-        'Pesquisa de mercado e de opinião pública',
-        'Atividades de produção de fotografias aéreas e submarinas',
-        'Serviços de microfilmagem',
-        'Serviços de Tradução, Interpretação e Similares',
-        'Serviços de agronomia e de consultoria e de atividades agrícolas e pecuárias',
-        'Atividades de intermediação e agenciamento de serviços e negócios em geral, exceto imobiliários',
-        'Agenciamento de profissionais para atividades esportivas, culturais e artísticas',
-        'Outras atividades profissionais, científicas e técnicas não especificadas anteriormente',
-        'Atividades de monitoramento de sistemas de segurança',
-        'Serviços combinados de escritório e apoio administrativo',
-        'Preparação de documentos e serviços especializados de apoio administrativo não especificados anteriormente.',
-        'Outras atividades de serviços prestados principalmente às empresas não especificadas anteriormente',
-        'Atividades de apoio à educação, exceto caixas escolares',
-        'Treinamento em desenvolvimento profissional e gerencial',
-        'Atividades de apoio a gestão de saúde (exceto serviços privativos de médicos)',
-        'Atividades de organizações associativas patronais e empresariais',
-        'Atividades de organizações associativas profissionais',
-        'Atividades de associações de defesa de direitos sociais',
-        'Atividades de organizações religiosas',
-        'Atividades associativas não especificadas anteriormente'
-    ];
+    // --- LÓGICA DE FRONTEND (JAVASCRIPT) ---
+    const cnpjInput = document.getElementById('cnpj');
     
-    function renderizarServicos() {
-        const container = document.getElementById('servicos-interesse-container');
-        let htmlContent = '';
-        
-        listaServicos.forEach(servico => {
-            // O valor (value) do checkbox é o nome do serviço
-            const value = servico.nome;
-            
-            htmlContent += `<label style="display:block; margin-bottom: 5px;">
-                                <input type="checkbox" name="servicos_interesse" value="${value.toUpperCase()}"> 
-                                ${servico.nome}
-                            </label>`;
-        });
-
-        container.innerHTML = htmlContent;
-    }
-
-    function renderizarSegmentos() {
-        const select = document.querySelector('select[name="segmento"]');
-        listaSegmentos.forEach(segmento => {
-            const option = document.createElement('option');
-            option.value = segmento;
-            option.textContent = segmento;
-            select.appendChild(option);
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderizarServicos();
-        renderizarSegmentos();
-        // Garante que a lógica condicional é executada no carregamento
-        // para configurar corretamente os campos do preenchedor
-        updatePreenchedorFields(document.getElementById('sou_socio_checkbox').checked);
-        checkFormValidity();
+    // 1. MÁSCARA CNPJ
+    cnpjInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, ''); 
+        value = value.replace(/^(\d{2})(\d)/, '$1.$2'); 
+        value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+        value = value.replace(/\.(\d{3})(\d)/, '.$1/$2'); 
+        value = value.replace(/(\d{4})(\d)/, '$1-$2'); 
+        e.target.value = value.substring(0, 18);
     });
 
-
-    // Variáveis para guardar dados do CNPJ para uso no PDF (evita re-busca no submit)
-    let cnaeGlobal = '';
-    let municipioGlobal = '';
-    let ufGlobal = '';
-
-    // --------------------------------------------------------------------------------
-    // 2. LÓGICA DE NEGÓCIO E UTILITÁRIOS
-    // --------------------------------------------------------------------------------
-
-    function formatCnpj(cnpj) {
-        if (!cnpj) return '';
-        // 00.000.000/0000-00
-        return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-    }
-
-    function sanitizeCity(city) {
-        if (!city) return "";
-        return city
-            .toLowerCase() 
-            .normalize("NFD") 
-            .replace(/[\u0300-\u036f]/g, "") 
-            .replace(/[^a-z0-9\s]/g, "") 
-            .trim(); 
-    }
-    // ... (restante da lógica de CNAEs, Cidades e Segmentação - INALTERADA) ...
-    const cnaes_ouro = new Set(["6920601", "6920602"]);
-    const cnaes_prata = new Set([
-        "0230600", "5229002", "5229099", "5240101", "5250804", "5250805", "6461100", "6462000", "6463800",
-        "6611801", "6611802", "6611803", "6611804", "6612605", "6613400", "6619302", "6619303", "6619399",
-        "6621501", "6621502", "6629100", "6630400", "6911702", "6911703", "7020400", "7119701", "7119702",
-        "7119703", "7119704", "7120100", "7210000", "7220700", "7319004", "7319002", "7420002", "7420005",
-        "7490101", "7490103", "7490104", "7490105", "7490199", "8020000", "8211300", "8219999", "8550302",
-        "8599604", "8660700", "9411100", "9412000", "9430800", "9491000", "9499500" ,"8299799","7320300"
-    ]);
-    const cidades_tupa = new Set(["tupa", "arcoiris", "bastao", "herculandia", "ikanji", "marilia", "pompeia", "queiroz"]);
-    const cidades_campinas = new Set(["campinas", "hortolandia", "sumare", "valinhos", "vinhedo", "jaguariuna", "paulinia", "itatiba", "indaiatuba", "amparo", "pedreira", "socorro", "aguas de lindoia", "monte alegre do sul", "serra negra", "holambra", "mogimirim", "mogiguacu", "artur nogueira", "nova odessa", "santa barbara doeste", "americana", "piracicaba", "limeira", "rio claro", "araras", "lemes"]);
-    const cidades_santos = new Set(["santos", "sao vicente", "praia grande", "guaruja", "cubatao", "bertioga", "mongagua", "itanhaem", "peruibe", "cananeia", "ilhabela", "caraguatatuba", "ubatuba", "sao sebastiao"]);
-    const prata_pricing = { 1: { total: 720.00, parcelas: 12, valor_parcela: 60.00, a_vista: 660.00 }, 2: { total: 660.00, parcelas: 11, valor_parcela: 60.00, a_vista: 607.00 }, 3: { total: 600.00, parcelas: 10, valor_parcela: 60.00, a_vista: 552.00 }, 4: { total: 540.00, parcelas: 9, valor_parcela: 60.00, a_vista: 497.00 }, 5: { total: 480.00, parcelas: 8, valor_parcela: 60.00, a_vista: 442.00 }, 6: { total: 420.00, parcelas: 7, valor_parcela: 60.00, a_vista: 386.00 }, 7: { total: 360.00, parcelas: 6, valor_parcela: 60.00, a_vista: 331.00 }, 8: { total: 300.00, parcelas: 5, valor_parcela: 60.00, a_vista: 276.00 }, 9: { total: 240.00, parcelas: 4, valor_parcela: 60.00, a_vista: 221.00 }, 10: { total: 180.00, parcelas: 3, valor_parcela: 60.00, a_vista: 166.00 }, 11: { total: 120.00, parcelas: 2, valor_parcela: 60.00, a_vista: 110.00 }, 12: { total: 60.00, parcelas: 1, valor_parcela: 60.00, a_vista: 60.00 } };
-    const ouro_premium_pricing = { 1: { total: 1140.00, parcelas: 12, valor_parcela: 95.00, a_vista: 1046.00 }, 2: { total: 1045.00, parcelas: 11, valor_parcela: 95.00, a_vista: 961.00 }, 3: { total: 950.00, parcelas: 10, valor_parcela: 95.00, a_vista: 874.00 }, 4: { total: 855.00, parcelas: 9, valor_parcela: 95.00, a_vista: 787.00 }, 5: { total: 760.00, parcelas: 8, valor_parcela: 95.00, a_vista: 700.00 }, 6: { total: 665.00, parcelas: 7, valor_parcela: 95.00, a_vista: 611.00 }, 7: { total: 570.00, parcelas: 6, valor_parcela: 95.00, a_vista: 524.00 }, 8: { total: 475.00, parcelas: 5, valor_parcela: 95.00, a_vista: 437.00 }, 9: { total: 380.00, parcelas: 4, valor_parcela: 95.00, a_vista: 350.00 }, 10: { total: 285.00, parcelas: 3, valor_parcela: 95.00, a_vista: 263.00 }, 11: { total: 190.00, parcelas: 2, valor_parcela: 95.00, a_vista: 175.00 }, 12: { total: 95.00, parcelas: 1, valor_parcela: 95.00, a_vista: 95.00 } };
-    const prata_aescon_pricing = { 1: { total: 420.00, parcelas: 12, valor_parcela: 35.00, a_vista: 386.00 }, 2: { total: 385.00, parcelas: 11, valor_parcela: 35.00, a_vista: 354.00 }, 3: { total: 350.00, parcelas: 10, valor_parcela: 35.00, a_vista: 322.00 }, 4: { total: 315.00, parcelas: 9, valor_parcela: 35.00, a_vista: 290.00 }, 5: { total: 280.00, parcelas: 8, valor_parcela: 35.00, a_vista: 258.00 }, 6: { total: 245.00, parcelas: 7, valor_parcela: 35.00, a_vista: 225.00 }, 7: { total: 210.00, parcelas: 6, valor_parcela: 35.00, a_vista: 193.00 }, 8: { total: 175.00, parcelas: 5, valor_parcela: 35.00, a_vista: 161.00 }, 9: { total: 140.00, parcelas: 4, valor_parcela: 35.00, a_vista: 129.00 }, 10: { total: 105.00, parcelas: 3, valor_parcela: 35.00, a_vista: 97.00 }, 11: { total: 70.00, parcelas: 2, valor_parcela: 35.00, a_vista: 65.00 }, 12: { total: 35.00, parcelas: 1, valor_parcela: 35.00, a_vista: 35.00 } };
-    function segmentar(cnae, cidade, uf) {
-        const cnae_str = String(cnae || '').trim();
-        const cidade_limpa = sanitizeCity(cidade); 
-        if (uf.toUpperCase() !== "SP") {
-            return "Fora de SP – Não podemos associar.";
-        }
-        let planoBase = null;
-        if (cnaes_ouro.has(cnae_str)) { 
-            planoBase = "Plano Ouro Premium";
-        } else if (cnaes_prata.has(cnae_str)) { 
-            planoBase = "Plano Prata";
-        } else {
-            return "CNAE fora do escopo. Contate Fecomércio: (11) 3254-1700";
-        }
-        if (planoBase === "Plano Ouro Premium" && (cidades_tupa.has(cidade_limpa) || cidades_campinas.has(cidade_limpa) || cidades_santos.has(cidade_limpa))) {
-            return "Prata Aescon";
-        }
-        if (cidades_tupa.has(cidade_limpa)) {
-            return "Fora da região (Tupã). E-mail: sescontupan@unisite.com.br";
-        }
-        if (cidades_campinas.has(cidade_limpa)) {
-            return "Fora da região (Campinas). E-mail: sesconcampinas@sesconcampinas.org.br";
-        }
-        if (cidades_santos.has(cidade_limpa)) {
-            return "Fora da região (Santos). E-mail: sheron@sesconbs.org.br";
-        }
-        return planoBase;
-    }
-
-    function getPlanoInfo(plano) {
-        // CORREÇÃO PARA ERRO DE PDF: Garante que 'plano' é uma string para evitar 'Cannot read properties of undefined'
-        const planoStr = plano || ''; 
-        
-        const mesAtual = new Date().getMonth() + 1;
-        let tabela = {};
-        
-        if (planoStr.includes("Prata")) { 
-            tabela = (planoStr === "Prata Aescon") ? prata_aescon_pricing : prata_pricing;
-        } else if (planoStr.includes("Ouro")) {
-            tabela = ouro_premium_pricing;
-        } else {
-            return { valor_a_vista: "N/A", valor_parcelado: "N/A", total: "N/A", valor_parcela: "N/A", parcelas: "N/A" };
-        }
-
-        const valores = tabela[mesAtual] || {};
-        
-        const aVista = valores.a_vista ? `R$ ${valores.a_vista.toFixed(2).replace('.', ',')}` : "N/A";
-        const valorParcela = valores.valor_parcela ? `R$ ${valores.valor_parcela.toFixed(2).replace('.', ',')}` : "N/A";
-        const valorTotalParcelado = valores.total ? `R$ ${valores.total.toFixed(2).replace('.', ',')}` : "N/A";
-        const parcelas = valores.parcelas;
-
-        const valorParceladoDisplay = parcelas && valorParcela ? `${parcelas}x de ${valorParcela} (Total: ${valorTotalParcelado})` : "N/A";
-
-        return {
-            valor_a_vista: aVista,
-            valor_parcelado: valorParceladoDisplay,
-            total: valorTotalParcelado, 
-            valor_parcela: valorParcela,
-            parcelas: parcelas
-        };
-    }
-    
-    // Função para identificar o primeiro campo inválido
-    function getFirstInvalidField() {
-        const requiredElements = form.querySelectorAll('[required]');
-        for (const element of requiredElements) {
-            // Verifica se o elemento está visível e inválido (excluindo os que estão hidden, mesmo que por CSS)
-            if (element.required && !element.checkValidity()) {
-                // Tenta pegar o texto do label ou retorna o nome do campo
-                return element.labels && element.labels.length > 0 ? element.labels[0].textContent.trim() : element.name;
-            }
-        }
-        return null;
-    }
-
-
-    // --------------------------------------------------------------------------------
-    // 3. EVENTOS (CNPJ, Condicionais e Assinatura)
-    // --------------------------------------------------------------------------------
-
-    // Elementos do DOM
-    const cnpjInput = document.querySelector('input[name="cnpj"]');
-    const razaoInput = document.querySelector('input[name="razao"]');
-    const enderecoInput = document.querySelector('input[name="endereco"]');
-    const planoInput = document.querySelector('input[name="plano"]');
-    const planoInfo = document.getElementById("plano-info");
-    const sociosSelect = document.getElementById("socios-select");
-    const sendBtn = document.getElementById("sendBtn");
-    const resultDiv = document.getElementById("result");
-    const form = document.getElementById("fichaForm");
-    const canvas = document.getElementById("signature-pad");
-    const ctx = canvas.getContext("2d");
-    let drawing = false;
-    let lastX = 0, lastY = 0;
-    let hasSigned = false; // Flag para a assinatura
-    const nomePreenchedor = document.querySelector('input[name="nome_preenchedor"]');
-    const cpfPreenchedor = document.querySelector('input[name="cpf_preenchedor"]');
-    const preenchedorContainer = document.getElementById('preenchedor_container');
-
-    // OTIMIZAÇÃO: Novo nome para a função de validação
-    function checkFormValidity() {
-        const planoSugerido = planoInput.value;
-        // O form.checkValidity() agora é seguro porque os campos do preenchedor
-        // têm o atributo 'required' removido quando estão escondidos.
-        const isFormValid = form.checkValidity(); 
-        const isSigned = hasSigned; 
-        
-        // 1. Verifica a elegibilidade do Plano (CNPJ e Região)
-        if (!planoSugerido || planoSugerido.includes('Fora') || planoSugerido.includes('CNAE fora')) {
-            if (cnpjInput.value.length === 14 && razaoInput.value === '') {
-                 planoInfo.innerHTML = '';
-                 sendBtn.disabled = true;
-                 resultDiv.textContent = '❌ CNPJ não encontrado ou inválido. Corrija o CNPJ.';
-                 return;
-            } else if (cnpjInput.value.length === 14) {
-                 planoInfo.innerHTML = `<span style="color:red;font-weight:bold;">${planoSugerido || 'N/A'}</span>`;
-                 sendBtn.disabled = true;
-                 resultDiv.textContent = '❌ CNPJ não elegível ou fora da região. Verifique o campo "Plano Sugerido".';
-                 return; 
-            }
-            planoInfo.innerHTML = '';
-            sendBtn.disabled = true; 
-            resultDiv.textContent = 'Digite 14 dígitos do CNPJ para buscar os dados.';
-            return;
-        } 
-        
-        // Se o plano for válido, mostra os valores
-        const planoInfoData = getPlanoInfo(planoSugerido);
-        planoInfo.textContent = `À vista: ${planoInfoData.valor_a_vista}. Parcelado: ${planoInfoData.valor_parcelado}.`;
-
-        // 2. Verifica a validade do Formulário (todos os campos 'required') e Assinatura
-        sendBtn.disabled = !(isFormValid && isSigned);
-
-        // 3. Atualiza o Feedback para o usuário
-        if (sendBtn.disabled) {
-            // Prioriza o feedback da assinatura se o form estiver OK
-            if (isFormValid && !isSigned) {
-                resultDiv.innerHTML = '⚠️ Por favor, faça a **Assinatura** no quadro acima para liberar o botão.';
-            } else if (!isFormValid) {
-                // Caso contrário, busca o primeiro campo faltando
-                const firstMissing = getFirstInvalidField();
-                if (firstMissing) {
-                    // OTIMIZAÇÃO: Usa `reportValidity()` para marcar o campo no navegador
-                    form.reportValidity(); 
-                    resultDiv.innerHTML = `⚠️ Preencha o campo obrigatório: **"${firstMissing}"** para habilitar o PDF.`;
-                } else {
-                    resultDiv.textContent = `⚠️ Verifique todos os campos obrigatórios (marcados com *).`;
-                }
-            }
-        } else {
-            resultDiv.textContent = '✅ Todos os campos obrigatórios preenchidos! Clique em "Gerar PDF" para finalizar.';
-        }
-    }
-
-
-    // Lógica de Assinatura
-    function drawLine(x1, y1, x2, y2) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-        ctx.lineJoin = 'round';
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.closePath();
-    }
-    
-    // Eventos de Assinatura
-    canvas.addEventListener("mousedown", (e) => {
-        drawing = true;
-        hasSigned = true; // Marca que o usuário começou a desenhar
-        const rect = canvas.getBoundingClientRect();
-        lastX = e.clientX - rect.left;
-        lastY = e.clientY - rect.top;
-    });
-    canvas.addEventListener("mousemove", (e) => {
-        if (!drawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        drawLine(lastX, lastY, x, y);
-        lastX = x;
-        lastY = y;
-    });
-    canvas.addEventListener("mouseup", () => {
-        drawing = false;
-        checkFormValidity(); // Revalida após soltar o mouse (fim da assinatura)
-    });
-    canvas.addEventListener("mouseout", () => drawing = false);
-    
-    // Touch events
-    canvas.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        drawing = true;
-        hasSigned = true; // Marca que o usuário começou a desenhar
-        const rect = canvas.getBoundingClientRect();
-        const t = e.touches[0];
-        lastX = t.clientX - rect.left;
-        lastY = t.clientY - rect.top;
-    }, { passive: false });
-    canvas.addEventListener("touchmove", (e) => {
-        e.preventDefault();
-        if (!drawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const t = e.touches[0];
-        const x = t.clientX - rect.left;
-        const y = t.clientY - rect.top;
-        drawLine(lastX, lastY, x, y);
-        lastX = x;
-        lastY = y;
-    }, { passive: false });
-    canvas.addEventListener("touchend", () => {
-        drawing = false;
-        checkFormValidity(); // Revalida após o toque terminar
+    // 2. MÁSCARA CPF
+    document.getElementById('cpfSocio').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, ''); 
+        value = value.replace(/(\d{3})(\d)/, '$1.$2'); 
+        value = value.replace(/(\d{3})(\d)/, '$1.$2'); 
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = value.substring(0, 14);
     });
     
-    document.getElementById("clearBtn").addEventListener("click", () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasSigned = false; // Reseta a flag
-        checkFormValidity(); // Revalida após limpar
-    });
-
-
-    // Evento de CNPJ
-    cnpjInput.addEventListener('input', async () => {
-        const cnpj = cnpjInput.value.replace(/\D/g, '');
-        if (cnpj.length === 14) {
-            resultDiv.textContent = 'Buscando dados do CNPJ...';
-            sendBtn.disabled = true; 
-            
-            planoInput.value = '';
-            planoInfo.textContent = '';
-            sociosSelect.innerHTML = '<option value="">Selecione o sócio responsável</option>';
-            razaoInput.value = '';
-            enderecoInput.value = '';
-
-            // Limpa dados globais
-            cnaeGlobal = '';
-            municipioGlobal = '';
-            ufGlobal = '';
-            cnpjFormatadoGlobal = formatCnpj(cnpj); // Armazena CNPJ formatado
-
-            try {
-                // Tenta usar a API do SESCON para dados cadastrais se for um endpoint exclusivo, 
-                // mas a BrasilAPI (Receita Federal) é mais confiável para dados públicos
-                const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    razaoInput.value = data.razao_social || '';
-                    const complemento = data.complemento ? ` (${data.complemento})` : '';
-                    enderecoInput.value = `${data.logradouro || ''}, ${data.numero || ''}${complemento}, ${data.bairro || ''} - ${data.municipio || ''}/${data.uf || ''} - CEP: ${data.cep || ''}`;
-                    
-                    // Armazena dados globais
-                    cnaeGlobal = data.cnae_fiscal;
-                    municipioGlobal = data.municipio;
-                    ufGlobal = data.uf;
-
-                    const municipioSanitizado = sanitizeCity(municipioGlobal);
-                    
-                    const planoSugerido = segmentar(cnaeGlobal, municipioSanitizado, ufGlobal);
-                    planoInput.value = planoSugerido || '';
-                    
-                    checkFormValidity();
-
-                    // Carrega os sócios
-                    if (data.qsa && data.qsa.length > 0) {
-                        data.qsa.forEach(socio => {
-                            const option = document.createElement('option');
-                            option.value = socio.nome_socio;
-                            option.textContent = socio.nome_socio;
-                            sociosSelect.appendChild(option);
-                        });
-                    }
-                    resultDiv.textContent = 'Dados carregados com sucesso.';
-                } else {
-                    resultDiv.textContent = `❌ Erro: CNPJ não encontrado ou inválido.`;
-                    sendBtn.disabled = true;
-                    razaoInput.value = '';
-                    enderecoInput.value = '';
-                    cnpjFormatadoGlobal = '';
-                    checkFormValidity(); // Revalida com o erro
-                }
-            } catch (error) {
-                resultDiv.textContent = `❌ Erro na requisição: ${error.message}. Verifique sua conexão.`;
-                sendBtn.disabled = true;
-                checkFormValidity(); // Revalida com o erro
-            }
-        } else {
-            resultDiv.textContent = 'Digite 14 dígitos do CNPJ para buscar os dados.';
-            sendBtn.disabled = true;
-            cnpjFormatadoGlobal = '';
-            checkFormValidity(); // Revalida
+    // Função de validação de dígitos (simples no cliente, mas é essencial no BACKEND)
+    function validateCNPJ(cnpj) {
+        cnpj = cnpj.replace(/[^\d]+/g,'');
+        if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) {
+            return false;
         }
-    });
-    
-    // Lógica condicional para CRC do Sócio
-    document.getElementById('crc_socio_select').addEventListener('change', function() {
-        const container = document.getElementById('crc_socio_container');
-        if (this.value === 'Sim') {
-            container.style.display = 'block';
-        } else {
-            container.style.display = 'none';
-            // Limpa o valor para não ir para o PDF se for 'Não'
-            document.querySelector('input[name="crc_socio_numero"]').value = '';
-        }
-        // Força a revalidação do formulário
-        checkFormValidity();
-    });
-
-    // Função para atualizar o estado dos campos do preenchedor
-    function updatePreenchedorFields(isSocio) {
-        if (!isSocio) {
-            preenchedorContainer.style.display = 'block';
-            nomePreenchedor.setAttribute('required', 'required'); // Adiciona required
-            cpfPreenchedor.setAttribute('required', 'required'); // Adiciona required
-        } else {
-            preenchedorContainer.style.display = 'none';
-            nomePreenchedor.removeAttribute('required'); // Remove required
-            cpfPreenchedor.removeAttribute('required'); // Remove required
-            // Limpa os valores para não serem enviados e não causarem falha de validação oculta
-            nomePreenchedor.value = '';
-            cpfPreenchedor.value = '';
-        }
+        return true;
     }
-    
-    // Lógica condicional para Preenchedor (Não Sócio)
-    document.getElementById('sou_socio_checkbox').addEventListener('change', function() {
-        // CORREÇÃO: Chama a função dedicada
-        updatePreenchedorFields(this.checked);
-        // Força a revalidação do formulário
-        checkFormValidity();
-    });
 
-    // Garante que o botão só habilita se o formulário for válido (para mudanças manuais nos campos)
-    form.addEventListener('change', checkFormValidity);
+    // 3. SIMULAÇÃO DE CONSULTA CNPJ e Regra de Base Territorial
+    function lookupCNPJ(cnpj) {
+        const errorDiv = document.getElementById('cnpj-error');
+        const alertDiv = document.getElementById('territorial-alert');
+        const submitButton = document.querySelector('button[type="submit"]');
 
+        errorDiv.textContent = '';
+        alertDiv.classList.add('d-none');
+        submitButton.disabled = false; // Habilita por padrão
 
-    // --------------------------------------------------------------------------------
-    // 4. GERAÇÃO DO PDF 
-    // --------------------------------------------------------------------------------
+        document.getElementById('razaoSocial').value = '';
+        document.getElementById('endereco').value = '';
+        document.getElementById('complemento').value = '';
 
-    form.addEventListener("submit", async (ev) => {
-        ev.preventDefault();
-        resultDiv.textContent = 'Gerando PDF...';
-
-        // Revalidação final antes de gerar o PDF
-        if (sendBtn.disabled || !form.checkValidity() || !hasSigned) {
-            resultDiv.innerHTML = '❌ Preencha todos os campos obrigatórios, assine e verifique a elegibilidade do CNPJ.';
+        if (cnpj.length < 18 || !validateCNPJ(cnpj)) {
+            errorDiv.textContent = 'CNPJ Inválido. Por favor, verifique o número.';
             return;
         }
 
-        const dados = {};
-        const formData = new FormData(form);
-        // Filtra apenas os checkboxes marcados para 'servicos_interesse'
-        dados.servicos_interesse = [];
-        for (let [key, value] of formData.entries()) {
-            if (key === 'servicos_interesse') {
-                dados.servicos_interesse.push(value);
-            } else {
-                dados[key] = value;
-            }
-        }
-
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        let y = 20;
-        const padding = 10;
-        
-        // Obter dados de preço e plano formatados
-        const planoInfoData = getPlanoInfo(dados.plano);
-        let valorAnuidade;
-        let detalhesPagamento;
-
-        if (dados.forma_pagamento === "À vista") {
-            valorAnuidade = planoInfoData.valor_a_vista;
-            detalhesPagamento = `Modalidade: À VISTA`;
+        // SIMULAÇÃO DE DADOS (A SER REALIZADA POR API NO 'processar.php')
+        let cidade = '';
+        if (cnpj.includes('09043954')) { // Exemplo de CNPJ em São Paulo (Base SESCON-SP)
+            document.getElementById('razaoSocial').value = 'BIU CONTA PRO MAX LTDA';
+            document.getElementById('endereco').value = 'AV PAULISTA, 1471';
+            document.getElementById('complemento').value = 'ANDAR 10';
+            cidade = 'SÃO PAULO';
+        } else if (cnpj.includes('62636675')) { // Exemplo de CNPJ fora da Base (Base AESCON)
+            document.getElementById('razaoSocial').value = 'EMPRESA FORA DA BASE TERRITORIAL';
+            document.getElementById('endereco').value = 'RUA X, 123';
+            document.getElementById('complemento').value = 'BLOCO A';
+            cidade = 'CAMPINAS'; // Base Territorial Restrita
         } else {
-            valorAnuidade = planoInfoData.total;
-            detalhesPagamento = `Modalidade: PARCELADO em ${planoInfoData.parcelas}x de ${planoInfoData.valor_parcela}`;
+            document.getElementById('razaoSocial').value = 'Dados obtidos com sucesso. Confirme os campos.';
         }
 
-        const associacao = dados.plano && dados.plano.toUpperCase().includes("AESCON") ? "AESCON-SP" : "SESCON-SP";
-        const contribuicao = dados.plano === "Plano Ouro Premium" ? "(Inclui Contribuição Representativa)" : "";
-
-        // TÍTULO DO PDF (SEGMENTADO)
-        const tituloPDF = `FICHA DE INSCRIÇÃO - ASSOCIAÇÃO ${associacao}`;
-
-
-        // =========================================================================
-        // CABEÇALHO E LOGO
-        // =========================================================================
-        try {
-            pdf.addImage(SESCON_LOGO_BASE64, 'PNG', 150, 10, 50, 15);
-            y = 30;
-        } catch (e) { y = 20; }
-
-        pdf.setFontSize(14);
-        pdf.text(tituloPDF, padding, y); // Título Dinâmico
-        y += 15;
-        
-        // =========================================================================
-        // DADOS DA EMPRESA
-        // =========================================================================
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold'); 
-        pdf.text("DADOS DA EMPRESA", padding, y);
-        pdf.setFont('helvetica', 'normal'); 
-        y += 8;
-        
-        pdf.setFontSize(10);
-        pdf.text(`RAZÃO SOCIAL: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 5;
-        // CNPJ com formatação original
-        pdf.text(`CNPJ: ${cnpjFormatadoGlobal || dados.cnpj || ''}`, padding, y); y += 5; 
-        pdf.text(`ENDEREÇO COMPLETO: ${dados.endereco ? dados.endereco.toUpperCase() : ''}`, padding, y); y += 5;
-        pdf.text(`E-MAIL: ${dados.email ? dados.email.toUpperCase() : ''}`, padding, y); y += 5;
-        pdf.text(`TELEFONE/WHATSAPP PRINCIPAL: ${dados.telefone || ''}`, padding, y); y += 5;
-        pdf.text(`CONTATO PREFERENCIAL: ${dados.contato_preferencial.toUpperCase()}`, padding, y); y += 5;
-        // Segmento de Atuação (Select)
-        pdf.text(`RAMO DE ATIVIDADE/CATEGORIA REPRESENTADA: ${dados.segmento.toUpperCase()}`, padding, y); y += 5; 
-        pdf.text(`CNAE PRINCIPAL (Receita Federal): ${cnaeGlobal || 'N/A'}`, padding, y); y += 8;
-        
-        // =========================================================================
-        // PLANO SUGERIDO E PAGAMENTO - DESTAQUE
-        // =========================================================================
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold'); 
-        pdf.text("PLANO E VALORES (ANUIDADE PROPORCIONAL)", padding, y);
-        pdf.setFont('helvetica', 'normal'); 
-        y += 8;
-        
-        pdf.setFontSize(10);
-        pdf.text(`PLANO: ${dados.plano ? dados.plano.toUpperCase() : ''} ${contribuicao}`, padding, y); y += 5;
-        pdf.text(`ASSOCIAÇÃO: ${associacao}`, padding, y); y += 5;
-        pdf.text(`VALOR TOTAL (ANUIDADE PROPORCIONAL): ${valorAnuidade}`, padding, y); y += 5;
-        pdf.text(`CONDIÇÃO DE PAGAMENTO: ${detalhesPagamento}`, padding, y); y += 8;
-
-        // OBSERVAÇÕES DE ANUIDADE
-        pdf.setFontSize(8);
-        pdf.text("A anuidade informada refere-se ao valor PROPORCIONAL aos meses restantes do ano corrente.", padding, y); y += 4;
-        pdf.text("No próximo ciclo de renovação, o valor será referente à anuidade integral.", padding, y); y += 10;
-        
-        // =========================================================================
-        // SERVIÇOS DE INTERESSE
-        // =========================================================================
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold'); 
-        pdf.text("SERVIÇOS DE INTERESSE SELECIONADOS:", padding, y);
-        pdf.setFont('helvetica', 'normal'); 
-        y += 5;
-        pdf.setFontSize(10);
-        // Lista os serviços selecionados
-        const servicosSelecionados = (dados.servicos_interesse || []).join(', ');
-        const splitText = pdf.splitTextToSize(servicosSelecionados || 'NENHUM SERVIÇO SELECIONADO', 180); 
-        pdf.text(splitText, padding + 5, y); 
-        y += splitText.length * 5 + 5; 
-
-        
-        // =========================================================================
-        // DADOS DO SÓCIO/RODAPÉ
-        // =========================================================================
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold'); 
-        pdf.text("DADOS DO SÓCIO/RESPONSÁVEL LEGAL", padding, y);
-        pdf.setFont('helvetica', 'normal'); 
-        y += 8;
-        
-        pdf.setFontSize(10);
-        pdf.text(`NOME COMPLETO DO SÓCIO: ${dados.nome_socio ? dados.nome_socio.toUpperCase() : ''}`, padding, y); y += 5;
-        pdf.text(`CPF DO SÓCIO: ${dados.cpf_socio || ''}`, padding, y); y += 5;
-        
-        let crcSocioTexto = `SÓCIO POSSUI REGISTRO NO CRC? ${dados.crc_socio.toUpperCase()}`;
-        if (dados.crc_socio === 'Sim' && dados.crc_socio_numero) {
-            crcSocioTexto += ` (Número(s): ${dados.crc_socio_numero.toUpperCase()})`;
+        // Lógica de Bloqueio/Alerta Base Territorial
+        if (cidade.toUpperCase() === 'CAMPINAS' || cidade.toUpperCase() === 'SANTOS' || cidade.toUpperCase() === 'TUPÃ') {
+            alertDiv.classList.remove('d-none');
+            submitButton.disabled = true; // Bloqueia o envio no Frontend
+            errorDiv.textContent = 'O envio foi bloqueado. Por favor, leia o alerta acima.';
         }
-        pdf.text(crcSocioTexto, padding, y); y += 5;
+    }
+    
+    // 4. LÓGICA DE ATUALIZAÇÃO DO PLANO
+    function updatePlanDetails(plano) {
+        const detailsDiv = document.getElementById('plano-details');
+        const valorInput = document.getElementById('valorProporcional');
+        let descricao = '';
+        let valorBase = 0;
 
-        // Dados de quem preencheu (se for diferente)
-        if (dados.nome_preenchedor && dados.nome_preenchedor.trim() !== "") {
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'bold'); 
-            pdf.text("DADOS DE QUEM PREENCHEU ESTE FORMULÁRIO", padding, y);
-            pdf.setFont('helvetica', 'normal'); 
-            y += 8;
-            pdf.setFontSize(10);
-            pdf.text(`NOME DO PREENCHEDOR: ${dados.nome_preenchedor.toUpperCase()}`, padding, y); y += 5;
-            pdf.text(`CPF DO PREENCHEDOR: ${dados.cpf_preenchedor || ''}`, padding, y); y += 5;
-            // OBS: O sócio está ciente, conforme checkbox e texto acima.
+        if (plano === 'Plano Ouro Premium') {
+            descricao = 'Inclui associação ao **SESCON** e à **AESCON-SP** + Pagamento de Contribuição Representativa. O plano mais completo.';
+            valorBase = 1200.00;
+        } else if (plano === 'Plano Ouro') {
+            descricao = 'Plano Ouro. Inclui associação ao SESCON-SP e à AESCON-SP. Não inclui Contribuição Representativa.';
+            valorBase = 900.00;
+        } else if (plano === 'Plano Prata') {
+            descricao = 'Plano Prata. Serviços essenciais. Inclui apenas associação ao SESCON-SP.';
+            valorBase = 500.00;
+        } else {
+            descricao = 'Selecione um plano para ver a descrição.';
+            valorBase = 0.00;
         }
 
-        // Rodapé de Dados
-        pdf.text(`EMPRESA: ${dados.razao ? dados.razao.toUpperCase() : ''}`, padding, y); y += 4;
-        const dataHora = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        pdf.text(`DATA DO PREENCHIMENTO: ${dataHora}`, padding, y); y += 6;
+        // Atualiza a descrição e simula o valor proporcional (A LÓGICA FINAL É NO BACKEND!)
+        detailsDiv.innerHTML = descricao;
+        const mesAtual = new Date().getMonth() + 1; // 1 (Jan) a 12 (Dez)
+        const mesesRestantes = 12 - mesAtual + 1;
         
-        // OBSERVAÇÃO DE RESPONSABILIDADE
-        pdf.setFontSize(8);
-        pdf.text(`OBSERVAÇÃO DE RESPONSABILIDADE: Declaro que todas as informações prestadas são de responsabilidade do associado/sócio responsável legal, nos termos do estatuto.`, padding, y); 
-        y += 10;
-
-        // ASSINATURA
-        const signatureImage = canvas.toDataURL("image/png");
-        if (signatureImage && signatureImage.length > "data:,".length) {
-            pdf.addImage(signatureImage, 'PNG', padding, y + 5, 100, 30);
+        // Simulação de cálculo proporcional
+        let valorProporcional = 0;
+        if (valorBase > 0) {
+            valorProporcional = (valorBase / 12) * mesesRestantes;
         }
-        y += 45;
-        pdf.text("________________________________", padding, y); y += 6;
-        pdf.text("ASSINATURA DO SÓCIO/RESPONSÁVEL LEGAL DA EMPRESA", padding, y);
-
-        // Geração do arquivo
-        const nomeArquivo = `Ficha_Inscricao_${(dados.razao || '').replace(/[^a-zA-Z0-9]/g, '_')}_${(dados.cnpj || '').replace(/\D/g, '')}.pdf`;
-        const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const link = document.getElementById("downloadLink");
-        link.href = url;
-        link.download = nomeArquivo;
-        link.style.display = "inline-block";
         
-        // Mensagem de sucesso atualizada
-        resultDiv.innerHTML = `
-            <h3>✅ PDF Gerado com Sucesso!</h3>
-            <p>Obrigado por sua inscrição. Emita o PDF e, em breve, você receberá um e-mail ou WhatsApp com o boleto para pagamento e as credenciais de acesso.</p>
-        `;
-        link.textContent = `📥 Baixar PDF: ${nomeArquivo}`; 
-    });
-
+        valorInput.value = `R$ ${valorProporcional.toFixed(2).replace('.', ',')}`;
+    }
 </script>
+
 </body>
 </html>
